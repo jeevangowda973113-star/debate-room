@@ -147,10 +147,44 @@ A.forEach(a=>{if(rd==1){a.s=first(a,q);a.s1=a.s}else a.s=clamp(a.s+(1-a.st)*.5*(
 paint();
 const pm=[0,1,2].map(i=>mean(A.filter(a=>a.p==i)));
 $('#tally').insertAdjacentHTML('beforeend','<tr><td>'+rd+'</td>'+pm.map(v=>'<td>'+fmt(v)+'</td>').join('')+'<td><b>'+fmt(mean(A))+'</b></td></tr>');
-await wait(500);
-$('#status').textContent='Round '+rd+' of 3: Gemini is '+(rd===1?'analysing both sides':rd===2?'challenging the arguments':'forming its final judgment')+'...';
-try{const reply=await askGeminiDebate(q,rd,geminiRounds.join('\\n\\n'));geminiRounds.push(reply);if(rd===1)$('#geminiDebate').querySelector('p').remove();addGeminiRound(rd,reply);}
-catch(error){const note=document.createElement('p');note.className='muted';note.textContent='Gemini round '+rd+' could not load: '+(error.name==='AbortError'?'request timed out':error.message);$('#geminiDebate').appendChild(note);geminiRounds.push('Gemini round unavailable.');}
+await wait(350);
+}
+$('#status').textContent='The crowd rounds are complete. Gemini is preparing its full three-round analysis...';
+try{
+ const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),50000);
+ let response,data;
+ try{response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({task:'debate',topic:q})});data=await response.json();}
+ finally{clearTimeout(timeout);}
+ if(!response.ok)throw new Error(data.error||'Gemini could not complete the debate.');
+ const reply=String(data.reply||'').trim();if(!reply)throw new Error('Gemini returned an empty response.');
+ geminiRounds=[reply];
+ $('#geminiDebate').innerHTML='<h3>Gemini debate</h3>';
+ const sections=[
+ ['ROUND 1 — INDEPENDENT ANALYSIS','Round 1 · Independent analysis'],
+ ['ROUND 2 — CHALLENGE AND REBUTTAL','Round 2 · Challenge and rebuttal'],
+ ['ROUND 3 — FINAL JUDGMENT','Round 3 · Final judgment']
+ ];
+ const findHeading=(text,heading)=>text.toUpperCase().indexOf(heading);
+ const positions=sections.map(s=>findHeading(reply,s[0]));
+ sections.forEach((s,i)=>{
+  const start=positions[i];if(start<0)return;
+  let end=reply.length;for(let j=i+1;j<positions.length;j++)if(positions[j]>start){end=positions[j];break;}
+  const part=reply.slice(start+s[0].length,end).trim();
+  const section=document.createElement('section');section.style.marginTop='12px';
+  const h=document.createElement('h4');h.textContent=s[1];
+  const p=document.createElement('p');p.style.whiteSpace='pre-wrap';p.textContent=part;
+  section.append(h,p);$('#geminiDebate').appendChild(section);
+ });
+ const defStart=findHeading(reply,'TOPIC DEFINITION');
+ const definition=$('#definition');
+ if(defStart>=0){definition.innerHTML='<h3>Topic definition</h3><p></p>';definition.querySelector('p').style.whiteSpace='pre-wrap';definition.querySelector('p').textContent=reply.slice(defStart+'TOPIC DEFINITION'.length).trim();}
+ else {definition.innerHTML='<h3>Topic definition</h3><p class="muted">Gemini did not include a separate definition. See its full analysis above.</p>';}
+ const finalStart=findHeading(reply,'ROUND 3 — FINAL JUDGMENT');
+ if(finalStart>=0){const finalText=reply.slice(finalStart+'ROUND 3 — FINAL JUDGMENT'.length,defStart>finalStart?defStart:reply.length).trim();const h=document.createElement('h3');h.style.marginTop='14px';h.textContent='Gemini conclusion';const p=document.createElement('p');p.style.whiteSpace='pre-wrap';p.textContent=finalText;$('#final').append(h,p);}
+}catch(error){
+ const note=document.createElement('p');note.className='muted';note.textContent='Gemini could not load: '+(error.name==='AbortError'?'request timed out':error.message);
+ $('#geminiDebate').appendChild(note);
+ $('#definition').innerHTML='<h3>Topic definition</h3><p class="muted">'+(error.message||'Gemini is unavailable. Please try again later.')+'</p>';
 }
 const pm=[0,1,2].map(i=>mean(A.filter(a=>a.p==i))),o=(pm[0]+pm[1]+pm[2])/3;
 const f=A.filter(a=>a.s>.25).length/3,ag=A.filter(a=>a.s<-.25).length/3,u=100-Math.round(f)-Math.round(ag);
@@ -160,9 +194,6 @@ const dis=[...A].sort((x,y)=>o>=0?x.s-y.s:y.s-x.s)[0];
 $('#final').innerHTML='<h3>Final answer</h3><p class="verdict">'+v+'</p><p>'+Math.round(f)+'% lean for, '+Math.round(ag)+'% lean against, '+u+'% undecided. Room score '+fmt(o)+' on a −2 to +2 scale. Confidence '+conf+'%.</p><p class="muted"><b>Strongest dissent:</b> '+dis.id+' ('+dis.role+'): “'+why(dis)+'”</p>';
 const mv=[...A].sort((x,y)=>Math.abs(y.s-y.s1)-Math.abs(x.s-x.s1)).slice(0,5);
 $('#trace').innerHTML='<h3>How the room reasoned</h3><p class="muted">Sub-questions every voice weighed:</p><ul>'+SUBQ.map(s=>'<li>'+s+'</li>').join('')+'</ul><p class="muted" style="margin-top:10px">Biggest changes of mind:</p><ul>'+mv.map(a=>'<li>'+a.id+' ('+a.role+') moved '+fmt(a.s1)+' to '+fmt(a.s)+' after hearing the room.</li>').join('')+'</ul>';
-const definition=$('#definition');definition.innerHTML='<h3>Topic definition</h3><p class="muted">Generating a neutral 2–3 paragraph definition...</p>';
-(async()=>{const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),30000);try{const dr=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({task:'definition',topic:q})});const dd=await dr.json();if(!dr.ok)throw new Error(dd.error||'Definition could not be generated.');definition.innerHTML='<h3>Topic definition</h3><p></p>';definition.querySelector('p').textContent=dd.reply||'No definition was returned.';}catch(e){definition.innerHTML='<h3>Topic definition</h3><p class="muted">The debate is complete, but Gemini could not generate the definition this time. Please try again later.</p>';}finally{clearTimeout(timeout)}})();
-if(geminiRounds[2]&&geminiRounds[2]!=='Gemini round unavailable.'){$('#final').insertAdjacentHTML('beforeend','<h3 style="margin-top:14px">Gemini conclusion</h3>');const conclusion=document.createElement('p');conclusion.style.whiteSpace='pre-wrap';conclusion.textContent=geminiRounds[2];$('#final').appendChild(conclusion);}
 $('#status').textContent='Debate complete.';$('#go').disabled=false}
 $('#go').onclick=run;
 </script>
