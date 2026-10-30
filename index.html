@@ -81,6 +81,7 @@ ul{margin:6px 0 0;padding-left:18px}li{margin-bottom:4px}
 <div class="card"><h3>Room average by round</h3>
 <table><thead><tr><th>Round</th><th>People</th><th>CEOs</th><th>Bots</th><th>Room</th></tr></thead><tbody id="tally"><tr><td colspan="5" class="muted">Nothing yet.</td></tr></tbody></table></div>
 <div class="card" id="final"><h3>Final answer</h3><p class="muted">The answer appears after round 3.</p></div>
+<div class="card" id="definition"><h3>Topic definition</h3><p class="muted">A clear definition of your debate topic will appear here after the debate.</p></div>
 <div class="card" id="trace"><h3>How the room reasoned</h3><p class="muted">Sub-questions and the biggest changes of mind appear here.</p></div>
 </aside>
 </div>
@@ -141,7 +142,9 @@ const dis=[...A].sort((x,y)=>o>=0?x.s-y.s:y.s-x.s)[0];
 $('#final').innerHTML='<h3>Final answer</h3><p class="verdict">'+v+'</p><p>'+Math.round(f)+'% lean for, '+Math.round(ag)+'% lean against, '+u+'% undecided. Room score '+fmt(o)+' on a −2 to +2 scale. Confidence '+conf+'%.</p><p class="muted"><b>Strongest dissent:</b> '+dis.id+' ('+dis.role+'): “'+why(dis)+'”</p>';
 const mv=[...A].sort((x,y)=>Math.abs(y.s-y.s1)-Math.abs(x.s-x.s1)).slice(0,5);
 $('#trace').innerHTML='<h3>How the room reasoned</h3><p class="muted">Sub-questions every voice weighed:</p><ul>'+SUBQ.map(s=>'<li>'+s+'</li>').join('')+'</ul><p class="muted" style="margin-top:10px">Biggest changes of mind:</p><ul>'+mv.map(a=>'<li>'+a.id+' ('+a.role+') moved '+fmt(a.s1)+' to '+fmt(a.s)+' after hearing the room.</li>').join('')+'</ul>';
-$('#status').textContent='Done.';$('#go').disabled=false}
+const definition=$('#definition');definition.innerHTML='<h3>Topic definition</h3><p class="muted">Generating a simple definition...</p>';
+try{const dr=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',text:'Give a clear, neutral definition of this debate topic: "'+q+'". Explain what the topic means in simple language, define any important terms, and give one short everyday example. Keep it concise and do not take either side: '+q}]})});const dd=await dr.json();if(!dr.ok)throw new Error(dd.error||'Definition could not be generated.');definition.innerHTML='<h3>Topic definition</h3><p></p>';definition.querySelector('p').textContent=dd.reply||'No definition was returned.';}catch(e){definition.innerHTML='<h3>Topic definition</h3><p class="muted">The debate is complete, but the definition could not be loaded. Please try again after checking the Gemini connection.</p>';}
+$('#status').textContent='Debate complete.';$('#go').disabled=false}
 $('#go').onclick=run;
 </script>
 <section class="ai-section" aria-labelledby="ai-title">
