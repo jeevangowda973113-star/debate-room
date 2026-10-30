@@ -4,43 +4,41 @@ export default async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: "Gemini is not configured. Check GEMINI_API_KEY in Vercel Production environment variables." });
 
   try {
-    const { task = "chat", topic = "", round = 0, previous = "", messages = [] } = req.body || {};
+    const { task = "chat", topic = "", messages = [] } = req.body || {};
     let input = "";
     let systemInstruction = "You are the helpful AI inside Debate Room. Be clear, balanced, accurate, and age-appropriate. Explain uncertainty and never invent facts.";
 
     if (task === "debate") {
-      const prompts = {
-        1: "ROUND 1 — INDEPENDENT ANALYSIS. Examine both sides of this topic. Give the strongest 3 arguments FOR and 3 AGAINST. Explain practical effects, assumptions and who is affected. Do not decide a winner. Keep it concise but useful.",
-        2: "ROUND 2 — CHALLENGE AND REBUTTAL. Challenge weak assumptions on both sides of the previous arguments. Give rebuttals, identify missing evidence and trade-offs, and explain what could change each side's view. Avoid repetition.",
-        3: "ROUND 3 — FINAL JUDGMENT. Give a balanced conclusion. Explain the strongest arguments and why, important conditions or caveats, and what a reasonable person should consider. Be clear about uncertainty."
-      };
-      if (!topic.trim() || !prompts[round]) return res.status(400).json({ error: "A topic and valid debate round are required." });
-      systemInstruction = "You are the lead moderator of Debate Room. Conduct a fair, evidence-conscious debate. Never invent statistics, sources or quotations. Use clear language suitable for a general audience.";
-      input = prompts[round] + "\n\nTOPIC: " + topic.slice(0, 1000) + (previous ? "\n\nPREVIOUS ROUNDS:\n" + previous.slice(0, 5000) : "");
-    } else if (task === "definition") {
       if (!topic.trim()) return res.status(400).json({ error: "A topic is required." });
-      systemInstruction = "Explain topics neutrally and clearly for a general audience. Do not take either side.";
-      input = "Write 2 or 3 complete, well-developed paragraphs (at least 2). First explain the topic simply and define key terms. Second provide context and why it matters in real life. Optional third paragraph: a simple example or important distinction. Stay neutral. Topic: " + topic.slice(0, 1000);
+      systemInstruction = "You are the lead moderator of Debate Room. Conduct a fair, evidence-conscious debate. Never invent statistics, sources or quotations. Use clear language suitable for a general audience.";
+      input = "Conduct the complete three-round debate for this topic in ONE response. Use these exact section headings so the website can display them:\n\nROUND 1 — INDEPENDENT ANALYSIS\nGive the strongest arguments FOR and AGAINST, with practical effects and assumptions.\n\nROUND 2 — CHALLENGE AND REBUTTAL\nChallenge weak assumptions on both sides, give counterarguments, identify missing evidence and trade-offs.\n\nROUND 3 — FINAL JUDGMENT\nGive a balanced conclusion, explain the strongest arguments and why, and note conditions and uncertainty.\n\nTOPIC DEFINITION\nWrite 2 complete, well-developed neutral paragraphs explaining what the topic means, its context and why it matters in real life.\n\nTOPIC: " + topic.slice(0, 1000);
     } else {
-      const safeMessages = (Array.isArray(messages) ? messages : []).slice(-12)
-        .filter(m => ["user", "model"].includes(m?.role) && typeof m?.text === "string");
-      if (!safeMessages.length || safeMessages[safeMessages.length - 1].role !== "user") {
-        return res.status(400).json({ error: "Send a message to start the conversation." });
+      if (task === "definition") {
+        if (!topic.trim()) return res.status(400).json({ error: "A topic is required." });
+        systemInstruction = "Explain topics neutrally and clearly for a general audience. Do not take either side.";
+        input = "Write 2 or 3 complete, well-developed paragraphs explaining the topic, its context and why it matters. Stay neutral. Topic: " + topic.slice(0, 1000);
+      } else {
+        const safeMessages = (Array.isArray(messages) ? messages : []).slice(-10)
+          .filter(m => ["user", "model"].includes(m?.role) && typeof m?.text === "string");
+        if (!safeMessages.length || safeMessages[safeMessages.length - 1].role !== "user") {
+          return res.status(400).json({ error: "Send a message to start the conversation." });
+        }
+        input = safeMessages.map(m => (m.role === "model" ? "Assistant: " : "User: ") + m.text.slice(0, 3000)).join("\n\n");
       }
-      input = safeMessages.map(m => (m.role === "model" ? "Assistant: " : "User: ") + m.text.slice(0, 4000)).join("\n\n");
     }
 
-    // Gemini Interactions API, with low thinking effort to reduce latency.
+    // Official Gemini Interactions API: thinking_level is a top-level field.
     const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-      signal: AbortSignal.timeout(50000),
+      signal: AbortSignal.timeout(45000),
       body: JSON.stringify({
         model: "gemini-3.8-flash",
         input,
         system_instruction: systemInstruction,
-        store: false,
-        generation_config: { thinking_level: "low" }
+        thinking_level: "low",
+        max_output_tokens: task === "debate" ? 2600 : 1200,
+        store: false
       })
     });
 
@@ -49,9 +47,9 @@ export default async function handler(req, res) {
       const detail = data?.error?.message || "Gemini request failed (" + response.status + ").";
       console.error("Gemini Interactions API error:", response.status, detail);
       const message = response.status === 429
-        ? "Gemini is busy or the API usage limit was reached. Wait a little and try again."
+        ? "Gemini daily free-tier request limit reached. It should reset after the time shown in Google AI Studio. Debate Room now uses one Gemini request per debate instead of four."
         : response.status >= 500
-          ? "Gemini is temporarily unavailable. Please try again shortly."
+          ? "Gemini is temporarily busy. Please try again shortly."
           : "Gemini API error: " + detail.slice(0, 220);
       return res.status(response.status === 429 ? 429 : 502).json({ error: message });
     }
@@ -63,10 +61,7 @@ export default async function handler(req, res) {
         .filter(part => part.type === "text" && typeof part.text === "string")
         .map(part => part.text).join("\n").trim();
     }
-    if (!reply) {
-      console.error("Gemini response had no output text:", JSON.stringify(data).slice(0, 1500));
-      return res.status(502).json({ error: "Gemini returned an empty response. Please try again." });
-    }
+    if (!reply) return res.status(502).json({ error: "Gemini returned an empty response. Please try again." });
     return res.status(200).json({ reply, model: "gemini-3.8-flash" });
   } catch (error) {
     console.error("Gemini endpoint error:", error);
