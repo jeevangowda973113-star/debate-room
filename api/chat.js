@@ -15,7 +15,7 @@ export default async function handler(req, res) {
         3: "ROUND 3 — FINAL JUDGMENT. Consider the full debate below. Give a balanced conclusion, explain which arguments are strongest and why, identify important conditions or caveats, and state what a reasonable person should consider before deciding. Do not pretend uncertainty is certainty."
       };
       if (!topic.trim() || !prompts[round]) return res.status(400).json({ error: "A topic and valid debate round are required." });
-      systemText = "You are the lead moderator and analyst of Debate Room. Your job is to conduct a rigorous, fair, evidence-conscious debate. Never fabricate statistics, sources, or quotations. Keep the language clear and suitable for a general audience.";
+      systemText = "You are the lead moderator and analyst of Debate Room. Conduct a rigorous, fair, evidence-conscious debate. Never fabricate statistics, sources, or quotations. Keep language clear and suitable for a general audience.";
       contents = [{ role: "user", parts: [{ text: prompts[round] + "\n\nTOPIC: " + topic.slice(0, 1200) + (previous ? "\n\nPREVIOUS ROUND:\n" + previous.slice(0, 9000) : "") }] }];
     } else if (task === "definition") {
       if (!topic.trim()) return res.status(400).json({ error: "A topic is required." });
@@ -31,39 +31,40 @@ export default async function handler(req, res) {
       contents = safeMessages;
     }
 
-    const models = ["gemini-3.8-flash", "gemini-2.5-flash"];
-    let lastError = "Gemini could not answer right now.";
-    for (const model of models) {
-      let response;
-      try {
-        response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-          signal: AbortSignal.timeout(25000),
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemText }] },
-            contents,
-            generationConfig: { temperature: 0.6, maxOutputTokens: task === "debate" ? 900 : task === "definition" ? 650 : 1200 }
-          })
-        });
-      } catch (error) {
-        lastError = error.name === "TimeoutError" ? "Gemini took too long to respond. Please try again." : "Could not connect to Gemini. Please try again.";
-        continue;
-      }
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        lastError = data?.error?.message || "Gemini request failed (" + response.status + ").";
-        if ([429, 500, 502, 503, 504].includes(response.status)) continue;
-        return res.status(502).json({ error: "Gemini could not answer: " + lastError.slice(0, 240) });
-      }
-      const reply = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("").trim();
-      if (reply) return res.status(200).json({ reply, model });
-      lastError = "Gemini returned an empty response.";
+    // Use the current stable Gemini model only. Do not fall back to retired models.
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+      signal: AbortSignal.timeout(45000),
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemText }] },
+        contents,
+        generationConfig: { temperature: 0.6, maxOutputTokens: task === "debate" ? 1200 : task === "definition" ? 750 : 1400 }
+      })
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const detail = data?.error?.message || "Gemini request failed (" + response.status + ").";
+      console.error("Gemini API error:", response.status, detail);
+      const message = response.status === 429
+        ? "Gemini is busy or the API usage limit was reached. Wait a little and try again."
+        : response.status >= 500
+          ? "Gemini is temporarily unavailable. Please try again shortly."
+          : "Gemini API error: " + detail.slice(0, 220);
+      return res.status(response.status === 429 ? 429 : 502).json({ error: message });
     }
-    console.error("Gemini request failed:", lastError);
-    return res.status(502).json({ error: lastError });
+
+    const reply = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("").trim();
+    if (!reply) {
+      const reason = data?.promptFeedback?.blockReason;
+      return res.status(502).json({ error: reason ? "Gemini could not answer because the request was blocked (" + reason + ")." : "Gemini returned an empty response. Please try again." });
+    }
+    return res.status(200).json({ reply, model: "gemini-3.8-flash" });
   } catch (error) {
     console.error("Chat endpoint error:", error);
-    return res.status(500).json({ error: "Something went wrong. Please try again." });
+    return res.status(error.name === "TimeoutError" ? 504 : 500).json({
+      error: error.name === "TimeoutError" ? "Gemini took too long to respond. Please try again." : "Could not connect to Gemini. Please try again."
+    });
   }
 }
