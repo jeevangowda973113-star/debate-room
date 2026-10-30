@@ -81,11 +81,11 @@ ul{margin:6px 0 0;padding-left:18px}li{margin-bottom:4px}
 <div class="card"><h3>Room average by round</h3>
 <table><thead><tr><th>Round</th><th>People</th><th>CEOs</th><th>Bots</th><th>Room</th></tr></thead><tbody id="tally"><tr><td colspan="5" class="muted">Nothing yet.</td></tr></tbody></table></div>
 <div class="card" id="final"><h3>Final answer</h3><p class="muted">The answer appears after round 3.</p></div>
-<div class="card" id="definition"><h3>Topic definition</h3><p class="muted">A clear definition of your debate topic will appear here after the debate.</p></div>
+<div class="card" id="geminiDebate"><h3>Gemini debate</h3><p class="muted">Gemini will analyse the topic across three rounds.</p></div>\n<div class="card" id="definition"><h3>Topic definition</h3><p class="muted">A clear definition of your debate topic will appear here after the debate.</p></div>
 <div class="card" id="trace"><h3>How the room reasoned</h3><p class="muted">Sub-questions and the biggest changes of mind appear here.</p></div>
 </aside>
 </div>
-<p class="note">This version is a simulation that runs in your browser and costs nothing. Each voice’s stance comes from its traits, the question and what the rest of the room says. It shows how a crowd’s opinion shifts, but it is not a real AI model reasoning about your question.</p>
+<p class="note">The 300 voices show a simulated crowd response. Gemini separately analyses the topic in three real AI-powered debate rounds, challenges arguments, and provides a final balanced assessment.</p>
 </div>
 <script>
 const $=s=>document.querySelector(s);
@@ -122,9 +122,23 @@ function paint(){A.forEach((a,i)=>{const s=a.s,v=s>=0?'--for':'--against';dots[i
 for(let i=0;i<3;i++)$('#m'+i).textContent='Average '+fmt(mean(A.filter(a=>a.p==i)))}
 CHIPS.forEach(t=>{const b=document.createElement('button');b.className='chip';b.textContent=t;b.onclick=()=>{$('#q').value=t};$('#chips').appendChild(b)});
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function askGeminiDebate(topic,round,previous){
+ const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),30000);
+ try{
+  const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({task:'debate',topic,round,previous})});
+  const data=await response.json();if(!response.ok)throw new Error(data.error||'Gemini could not complete this round.');
+  return data.reply;
+ }finally{clearTimeout(timeout)}
+}
+function addGeminiRound(round,reply){
+ const section=document.createElement('section');section.style.marginTop='12px';
+ const heading=document.createElement('h4');heading.textContent='Round '+round+(round===1?' · Independent analysis':round===2?' · Challenge and rebuttal':' · Final judgment');
+ const body=document.createElement('p');body.style.whiteSpace='pre-wrap';body.textContent=reply;
+ section.append(heading,body);$('#geminiDebate').appendChild(section);
+}
 async function run(){
 const q=$('#q').value.trim();if(!q){$('#status').textContent='Type a question first.';return}
-$('#go').disabled=true;A=build();$('#tally').innerHTML='';
+$('#go').disabled=true;A=build();$('#tally').innerHTML='';$('#geminiDebate').innerHTML='<h3>Gemini debate</h3><p class="muted">Gemini is analysing the topic across three rounds...</p>';let geminiRounds=[];
 const names=['independent opinions','hearing the room','final positions'];
 for(let rd=1;rd<=3;rd++){
 $('#status').textContent='Round '+rd+' of 3: '+names[rd-1];
@@ -133,7 +147,11 @@ A.forEach(a=>{if(rd==1){a.s=first(a,q);a.s1=a.s}else a.s=clamp(a.s+(1-a.st)*.5*(
 paint();
 const pm=[0,1,2].map(i=>mean(A.filter(a=>a.p==i)));
 $('#tally').insertAdjacentHTML('beforeend','<tr><td>'+rd+'</td>'+pm.map(v=>'<td>'+fmt(v)+'</td>').join('')+'<td><b>'+fmt(mean(A))+'</b></td></tr>');
-await wait(1500)}
+await wait(500);
+$('#status').textContent='Round '+rd+' of 3: Gemini is '+(rd===1?'analysing both sides':rd===2?'challenging the arguments':'forming its final judgment')+'...';
+try{const reply=await askGeminiDebate(q,rd,geminiRounds.join('\\n\\n'));geminiRounds.push(reply);if(rd===1)$('#geminiDebate').querySelector('p').remove();addGeminiRound(rd,reply);}
+catch(error){const note=document.createElement('p');note.className='muted';note.textContent='Gemini round '+rd+' could not load: '+(error.name==='AbortError'?'request timed out':error.message);$('#geminiDebate').appendChild(note);geminiRounds.push('Gemini round unavailable.');}
+}
 const pm=[0,1,2].map(i=>mean(A.filter(a=>a.p==i))),o=(pm[0]+pm[1]+pm[2])/3;
 const f=A.filter(a=>a.s>.25).length/3,ag=A.filter(a=>a.s<-.25).length/3,u=100-Math.round(f)-Math.round(ag);
 const sd=Math.sqrt(A.reduce((t,a)=>t+(a.s-mean(A))**2,0)/300),conf=Math.round(Math.max(0,1-sd/1.6)*100);
@@ -142,8 +160,9 @@ const dis=[...A].sort((x,y)=>o>=0?x.s-y.s:y.s-x.s)[0];
 $('#final').innerHTML='<h3>Final answer</h3><p class="verdict">'+v+'</p><p>'+Math.round(f)+'% lean for, '+Math.round(ag)+'% lean against, '+u+'% undecided. Room score '+fmt(o)+' on a −2 to +2 scale. Confidence '+conf+'%.</p><p class="muted"><b>Strongest dissent:</b> '+dis.id+' ('+dis.role+'): “'+why(dis)+'”</p>';
 const mv=[...A].sort((x,y)=>Math.abs(y.s-y.s1)-Math.abs(x.s-x.s1)).slice(0,5);
 $('#trace').innerHTML='<h3>How the room reasoned</h3><p class="muted">Sub-questions every voice weighed:</p><ul>'+SUBQ.map(s=>'<li>'+s+'</li>').join('')+'</ul><p class="muted" style="margin-top:10px">Biggest changes of mind:</p><ul>'+mv.map(a=>'<li>'+a.id+' ('+a.role+') moved '+fmt(a.s1)+' to '+fmt(a.s)+' after hearing the room.</li>').join('')+'</ul>';
-const definition=$('#definition');definition.innerHTML='<h3>Topic definition</h3><p class="muted">Generating a simple definition...</p>';
-(async()=>{const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),20000);try{const dr=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({messages:[{role:'user',text:'Write a clear, neutral explanation of this debate topic in 2 to 3 complete, well-developed paragraphs (at least 2 paragraphs). In paragraph 1, explain what the topic means in simple language and define its key terms. In paragraph 2, give useful context and explain why the topic matters in real life. If helpful, use paragraph 3 for a simple everyday example or an important distinction. Keep it balanced and educational; do not argue for either side. Topic: "'+q+'"' }]})});const dd=await dr.json();if(!dr.ok)throw new Error(dd.error||'Definition could not be generated.');definition.innerHTML='<h3>Topic definition</h3><p></p>';definition.querySelector('p').textContent=dd.reply||'No definition was returned.';}catch(e){definition.innerHTML='<h3>Topic definition</h3><p class="muted">The debate has finished, but the topic definition is temporarily unavailable. You can still use the debate results.</p>';}finally{clearTimeout(timeout)}})();
+const definition=$('#definition');definition.innerHTML='<h3>Topic definition</h3><p class="muted">Generating a neutral 2–3 paragraph definition...</p>';
+(async()=>{const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),30000);try{const dr=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({task:'definition',topic:q})});const dd=await dr.json();if(!dr.ok)throw new Error(dd.error||'Definition could not be generated.');definition.innerHTML='<h3>Topic definition</h3><p></p>';definition.querySelector('p').textContent=dd.reply||'No definition was returned.';}catch(e){definition.innerHTML='<h3>Topic definition</h3><p class="muted">The debate is complete, but Gemini could not generate the definition this time. Please try again later.</p>';}finally{clearTimeout(timeout)}})();
+if(geminiRounds[2]&&geminiRounds[2]!=='Gemini round unavailable.'){$('#final').insertAdjacentHTML('beforeend','<h3 style="margin-top:14px">Gemini conclusion</h3>');const conclusion=document.createElement('p');conclusion.style.whiteSpace='pre-wrap';conclusion.textContent=geminiRounds[2];$('#final').appendChild(conclusion);}
 $('#status').textContent='Debate complete.';$('#go').disabled=false}
 $('#go').onclick=run;
 </script>
