@@ -36,8 +36,10 @@ export default async function handler(req, res) {
         model: "gemini-3.8-flash",
         input,
         system_instruction: systemInstruction,
-        thinking_level: "low",
-        max_output_tokens: task === "debate" ? 2600 : 1200,
+        generation_config: {
+          thinking_level: "low",
+          max_output_tokens: task === "debate" ? 2600 : 1200
+        },
         store: false
       })
     });
