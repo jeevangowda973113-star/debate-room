@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     if (task === "debate") {
       if (!topic.trim()) return res.status(400).json({ error: "A topic is required." });
       systemInstruction = "You are the lead moderator of Debate Room. Conduct a fair, evidence-conscious debate. Never invent statistics, sources or quotations. Use clear language suitable for a general audience.";
-      input = "Conduct the complete three-round debate for this topic in ONE response. Use these exact section headings so the website can display them:\n\nROUND 1 — INDEPENDENT ANALYSIS\nGive the strongest arguments FOR and AGAINST, with practical effects and assumptions.\n\nROUND 2 — CHALLENGE AND REBUTTAL\nChallenge weak assumptions on both sides, give counterarguments, identify missing evidence and trade-offs.\n\nROUND 3 — FINAL JUDGMENT\nGive a balanced conclusion, explain the strongest arguments and why, and note conditions and uncertainty.\n\nTOPIC DEFINITION\nWrite 2 complete, well-developed neutral paragraphs explaining what the topic means, its context and why it matters in real life.\n\nTOPIC: " + topic.slice(0, 1000);
+      input = "Give a concise but useful three-round debate. Use these exact headings:\n\nROUND 1 — INDEPENDENT ANALYSIS\nGive the 2 strongest arguments FOR and 2 AGAINST.\n\nROUND 2 — CHALLENGE AND REBUTTAL\nChallenge the key assumption on each side and give a clear rebuttal.\n\nROUND 3 — FINAL JUDGMENT\nGive a balanced verdict, strongest reason, key trade-off and what evidence could change the conclusion.\n\nTOPIC DEFINITION\nWrite exactly 2 clear, neutral paragraphs explaining the topic, its context and why it matters.\n\nKeep the entire answer focused and avoid repetition. TOPIC: " + topic.slice(0, 1000);
     } else {
       if (task === "definition") {
         if (!topic.trim()) return res.status(400).json({ error: "A topic is required." });
@@ -31,14 +31,14 @@ export default async function handler(req, res) {
     const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-      signal: AbortSignal.timeout(45000),
+      signal: AbortSignal.timeout(35000),
       body: JSON.stringify({
         model: "gemini-3.8-flash",
         input,
         system_instruction: systemInstruction,
         generation_config: {
           thinking_level: "low",
-          max_output_tokens: task === "debate" ? 2600 : 1200
+          max_output_tokens: task === "debate" ? 1700 : 900
         },
         store: false
       })
