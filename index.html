@@ -60,6 +60,69 @@ ul{margin:6px 0 0;padding-left:18px}li{margin-bottom:4px}
 .ai-error{min-height:1.3em;color:var(--mute);font-size:.9rem;margin:8px 0 0}
 @media(max-width:560px){.ai-form{flex-direction:column}.ai-form .go{width:100%}}
 </style>
+<style>
+/* High-contrast Debate Room refresh */
+:root{
+ --bg:#080D18;--panel:#111A2B;--ink:#F4F7FF;--mute:#B7C3D8;--line:#34435C;
+ --for:#00E0A4;--against:#FF5268;--neutral:#65738B;
+ color-scheme:dark;
+}
+body{
+ background:radial-gradient(ellipse at 12% 0%,rgba(0,224,164,.10),transparent 34%),radial-gradient(ellipse at 92% 8%,rgba(255,82,104,.10),transparent 30%),var(--bg);
+ color:var(--ink);
+}
+.wrap{max-width:1280px;padding-top:42px}
+h1{letter-spacing:-.045em;text-shadow:0 8px 40px rgba(0,224,164,.12)}
+.sub{color:#C2CDE0;font-size:1.05rem}
+.room,.card,.ai-card{
+ background:linear-gradient(145deg,rgba(22,34,54,.98),rgba(13,22,38,.98));
+ border:1px solid #3A4B68;border-radius:18px;
+ box-shadow:0 16px 42px rgba(0,0,0,.24);
+}
+.room{padding:18px;gap:16px}
+.panel h2{color:#F5F8FF;font-size:1rem}
+.mean,.muted,.note{color:#B7C3D8}
+.grid{gap:5px}
+.dot{background:#65738B;border:1px solid rgba(255,255,255,.13);box-shadow:inset 0 1px 2px rgba(255,255,255,.12)}
+.dot:hover{transform:scale(1.14);outline:2px solid rgba(255,255,255,.35);outline-offset:1px}
+.dot:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.detail{border-color:#3A4B68;color:#D5DDF0}
+.legend{color:#D5DDF0}
+.bar{height:10px;background:linear-gradient(90deg,#FF5268 0%,#65738B 50%,#00E0A4 100%)}
+.card{padding:20px;margin-bottom:16px}
+.card h3,.ai-card h2{color:#F5F8FF;font-weight:800;letter-spacing:-.02em}
+textarea{
+ color:#F5F8FF;background:#080F1D;border:1px solid #536580;border-radius:12px;
+}
+textarea::placeholder{color:#8998B1}
+textarea:focus{outline:3px solid rgba(0,224,164,.28);border-color:#00E0A4}
+.chip{color:#E7EEFA;border-color:#536580;background:#17243A}
+.chip:hover{border-color:#00E0A4;background:#193447}
+.go{background:#00E0A4;color:#04130F;border:1px solid #00E0A4;border-radius:12px;font-weight:800;box-shadow:0 6px 20px rgba(0,224,164,.16)}
+.go:hover:not(:disabled){background:#64F5C9;transform:translateY(-1px)}
+.go:focus-visible,.chip:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.go:disabled{background:#526078;color:#D5DDF0;border-color:#526078}
+#status,.ai-error{color:#D5DDF0}
+table{color:#EDF2FC}
+th{color:#B7C3D8}
+th,td{border-color:#34435C;padding:8px 7px}
+.verdict{color:#00E0A4;font-size:1.7rem}
+.ai-section{max-width:1280px}
+.ai-card{padding:22px}
+.ai-intro{color:#B7C3D8}
+.ai-messages{background:#080F1D;border-color:#3A4B68;border-radius:14px}
+.ai-message.model{background:#17243A;border:1px solid #405371;color:#F4F7FF}
+.ai-message.user{background:#00E0A4;color:#04130F;font-weight:600}
+.note{border-top:1px solid #34435C;padding-top:14px}
+@media(max-width:560px){
+ .wrap{padding:24px 14px 32px}
+ .room{padding:12px}
+ .card,.ai-card{padding:16px}
+}
+@media(prefers-reduced-motion:reduce){
+ .dot,.go{transition:none}
+}
+</style>
 </head>
 <body>
 <div class="wrap">
