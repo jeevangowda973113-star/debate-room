@@ -72,7 +72,7 @@ async function callClaude(apiKey, systemInstruction, input, messages, task) {
 
   const reply = Array.isArray(data?.content)
     ? data.content.filter(block => block.type === "text" && typeof block.text === "string")
-        .map(block => block.text).join("\\n").trim()
+        .map(block => block.text).join("\n").trim()
     : "";
   if (!reply) throw new Error("Claude returned an empty response.");
   return { reply, model };
