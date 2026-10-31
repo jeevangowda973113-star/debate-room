@@ -71,7 +71,14 @@ function buildChatInstruction(mode) {
     creative: "For creative work: follow the requested audience, format, tone, and constraints. Make the result specific and original rather than generic.",
     general: "For general questions: answer directly, then add only the context needed to make the answer understandable and useful."
   };
-  return base + "\n\n" + modes[mode];
+  return base + "\n\n" + modes[mode] + "\n\n" +
+    "DEEP QUALITY STANDARD\n" +
+    "- For difficult requests, reason through the problem carefully before writing; do not expose private chain-of-thought.\n" +
+    "- Break complex work into verifiable stages and make dependencies explicit.\n" +
+    "- Check calculations, code logic, edge cases, and internal consistency before responding.\n" +
+    "- Prefer robust, maintainable solutions over clever but fragile shortcuts.\n" +
+    "- If current facts or external systems are needed and no tool is available, clearly state what cannot be verified.\n" +
+    "- Never claim code was tested or an action completed unless a tool confirms it.";
 }
 
 async function callGroq(apiKey, systemInstruction, input, messages, task, mode) {
