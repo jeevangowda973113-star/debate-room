@@ -81,6 +81,35 @@ function buildChatInstruction(mode) {
     "- Never claim code was tested or an action completed unless a tool confirms it.";
 }
 
+async function callGemini(apiKey, systemInstruction, input, messages, task, mode, outputTokens) {
+  const contents = task === "chat" && messages.length
+    ? messages.map(message => ({
+        role: message.role === "model" ? "model" : "user",
+        parts: [{ text: message.text }]
+      }))
+    : [{ role: "user", parts: [{ text: input }] }];
+
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(apiKey), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: systemInstruction }] },
+      contents,
+      generationConfig: { temperature: mode === "creative" ? 0.7 : 0.35, maxOutputTokens: outputTokens }
+    })
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const detail = data?.error?.message || "Primary AI request failed (" + response.status + ").";
+    throw new Error(detail.slice(0, 220));
+  }
+  const reply = data?.candidates?.[0]?.content?.parts?.map(part => part.text || "").join("").trim();
+  if (!reply) throw new Error("Primary AI returned an empty response.");
+  return reply;
+}
+
 async function callGroq(apiKey, systemInstruction, input, messages, task, mode, outputTokens) {
   const groqMessages = [{ role: "system", content: systemInstruction }];
   if (task === "chat" && messages.length) {
@@ -131,9 +160,10 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) {
-      return res.status(503).json({ error: "Groq is not configured. Add GROQ_API_KEY in Vercel Environment Variables, then redeploy." });
+    const geminiKey = process.env.GEMINI_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY;
+    if (!geminiKey && !groqKey) {
+      return res.status(503).json({ error: "Thinkora AI is not configured yet. Add GEMINI_API_KEY in Vercel Environment Variables." });
     }
 
     const body = req.body && typeof req.body === "object" ? req.body : {};
@@ -171,28 +201,52 @@ export default async function handler(req, res) {
     const complexRequest = isComplexRequest(latestPrompt);
     const outputTokens = task === "debate" ? 3000 : complexRequest ? 3000 : mode === "coding" || mode === "reasoning" ? 2400 : 1600;
 
-    const reply = await callGroq(apiKey, systemInstruction, input, safeMessages, task, mode, outputTokens);
+    let reply;
+    let provider = "Thinkora AI";
+    let fallbackUsed = false;
+    let primaryError = null;
+    if (geminiKey) {
+      try {
+        reply = await callGemini(geminiKey, systemInstruction, input, safeMessages, task, mode, outputTokens);
+      } catch (error) {
+        primaryError = error;
+        console.warn("Thinkora AI primary provider unavailable; trying backup.");
+      }
+    }
+    if (!reply && groqKey) {
+      try {
+        reply = await callGroq(groqKey, systemInstruction, input, safeMessages, task, mode, outputTokens);
+        fallbackUsed = true;
+      } catch (error) {
+        console.error("Thinkora AI backup provider error:", error);
+        if (!primaryError) primaryError = error;
+      }
+    }
+    if (!reply) {
+      const detail = String(primaryError?.message || "No AI provider could complete the request.");
+      throw new Error(detail.slice(0, 180));
+    }
     return res.status(200).json({
       reply,
-      model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
-      provider: "Groq",
+      provider,
+      fallbackUsed,
       mode,
       depth: complexRequest ? "deep" : "standard"
     });
   } catch (error) {
-    console.error("Thinkora Groq API error:", error);
+    console.error("Thinkora AI API error:", error);
     const message = String(error?.message || "Groq request failed.");
     const status = /401|invalid api key|authentication/i.test(message) ? 502 :
       /429|rate limit|quota/i.test(message) ? 503 :
       /timed out|timeout|abort/i.test(message) ? 504 : 502;
     return res.status(status).json({
       error: /401|invalid api key|authentication/i.test(message)
-        ? "Groq rejected the API key. Check GROQ_API_KEY in Vercel Environment Variables."
+        ? "Thinkora AI could not authenticate with its configured AI providers. Check the API keys in Vercel Environment Variables."
         : /429|rate limit|quota/i.test(message)
-          ? "Groq rate limit reached. Please wait and try again."
+          ? "Thinkora AI is temporarily busy. Please wait and try again."
           : /timed out|timeout|abort/i.test(message)
-            ? "Groq took too long to respond. Please try again."
-            : "Groq could not complete the request: " + message.slice(0, 180)
+            ? "Thinkora AI took too long to respond. Please try again."
+            : "Thinkora AI could not complete the request: " + message.slice(0, 180)
     });
   }
 }
