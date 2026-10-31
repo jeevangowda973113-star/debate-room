@@ -38,6 +38,46 @@ async function callGroq(apiKey, systemInstruction, input, messages, task) {
   return reply.trim();
 }
 
+
+async function callClaude(apiKey, systemInstruction, input, messages, task) {
+  const claudeMessages = task === "chat" && messages.length
+    ? messages.map(message => ({
+        role: message.role === "model" ? "assistant" : "user",
+        content: message.text.slice(0, 3000)
+      }))
+    : [{ role: "user", content: input }];
+
+  const model = process.env.CLAUDE_MODEL || "claude-sonnet-5-5";
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01"
+    },
+    signal: AbortSignal.timeout(35000),
+    body: JSON.stringify({
+      model,
+      max_tokens: task === "debate" ? 2200 : 1400,
+      system: systemInstruction,
+      messages: claudeMessages
+    })
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const detail = data?.error?.message || "Claude request failed (" + response.status + ").";
+    throw new Error(detail.slice(0, 220));
+  }
+
+  const reply = Array.isArray(data?.content)
+    ? data.content.filter(block => block.type === "text" && typeof block.text === "string")
+        .map(block => block.text).join("\\n").trim()
+    : "";
+  if (!reply) throw new Error("Claude returned an empty response.");
+  return { reply, model };
+}
+
 const THINKORA_CHAT_INSTRUCTION = `You are Thinkora AI, a capable general-purpose assistant inside the Thinkora project.
 
 Your goal is to help users understand, create, plan, learn, and solve problems.
@@ -80,7 +120,7 @@ export default async function handler(req, res) {
   try {
     const { task = "chat", topic = "", messages = [] } = req.body || {};
     const geminiKey = process.env.GEMINI_API_KEY;
-    const groqKey = process.env.GROQ_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY;\n    const claudeKey = process.env.ANTHROPIC_API_KEY;
     let input = "";
     let systemInstruction = THINKORA_CHAT_INSTRUCTION;
     let safeMessages = [];
@@ -148,6 +188,22 @@ export default async function handler(req, res) {
       geminiFailure = "Gemini API key is not configured.";
     }
 
+    let claudeFailure = null;
+    if (claudeKey) {
+      try {
+        const result = await callClaude(claudeKey, systemInstruction, input, safeMessages, task);
+        return res.status(200).json({
+          reply: result.reply,
+          model: result.model,
+          provider: "Claude",
+          fallback: true
+        });
+      } catch (error) {
+        console.error("Claude fallback error:", error);
+        claudeFailure = " Claude backup failed: " + error.message;
+      }
+    }
+
     if (groqKey) {
       try {
         const reply = await callGroq(groqKey, systemInstruction, input, safeMessages, task);
@@ -155,13 +211,14 @@ export default async function handler(req, res) {
       } catch (error) {
         console.error("Groq fallback error:", error);
         return res.status(502).json({
-          error: geminiFailure + " Groq backup also failed: " + error.message
+          error: geminiFailure + (claudeFailure || " Claude backup is not configured.") + " Groq backup also failed: " + error.message
         });
       }
     }
 
     return res.status(502).json({
-      error: geminiFailure + " Add GROQ_API_KEY in Vercel to enable automatic backup."
+      error: geminiFailure + (claudeFailure || " Add ANTHROPIC_API_KEY in Vercel to enable Claude backup.") +
+        " Add GROQ_API_KEY in Vercel to enable Groq backup."
     });
   } catch (error) {
     console.error("Thinkora API error:", error);
