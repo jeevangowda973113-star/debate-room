@@ -176,7 +176,7 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 const $=id=>document.getElementById(id);
 const form=$('chatForm'),input=$('prompt'),send=$('send'),micButton=$('micButton'),messagesEl=$('messages'),welcome=$('welcome'),historyEl=$('history'),search=$('searchHistory'),sidebar=$('sidebar'),conversation=$('conversation'),pageLabel=$('pageLabel'),mode=$('mode');
 const STORAGE='thinkora-conversations-v1',THEME='thinkora-theme-v1';
-const workspaceNav=['codeLabNav','pluginStoreNav','developerStudioNav'];
+const workspaceNav=['codeLabNav','pluginStoreNav','developerStudioNav','videoStudioNav'];
 function setWorkspaceActive(id){workspaceNav.forEach(key=>$(key)?.classList.toggle('active',key===id));}
 let chats=[],activeId=null,busy=false;
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
