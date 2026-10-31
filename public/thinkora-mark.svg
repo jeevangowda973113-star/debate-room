@@ -1,13 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
 <defs>
- <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f2b7ff"/><stop offset=".42" stop-color="#842cff"/><stop offset="1" stop-color="#20d9ff"/></linearGradient>
- <linearGradient id="ring" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#e32cff"/><stop offset=".5" stop-color="#644bff"/><stop offset="1" stop-color="#20e6ff"/></linearGradient>
- <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8a22ff"/><stop offset="1" stop-color="#08dfff"/></linearGradient>
- <filter id="glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <linearGradient id="silver" x1="0" y1="0" x2="0.9" y2="1"><stop stop-color="#fff"/><stop offset=".24" stop-color="#bfc1c4"/><stop offset=".5" stop-color="#f3f3f3"/><stop offset=".76" stop-color="#85888d"/><stop offset="1" stop-color="#d9dadd"/></linearGradient>
+ <linearGradient id="side" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#777a80"/><stop offset="1" stop-color="#303238"/></linearGradient>
+ <linearGradient id="ring" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#8d9096"/><stop offset=".55" stop-color="#f2f2f2"/><stop offset="1" stop-color="#777a80"/></linearGradient>
 </defs>
-<rect x="12" y="12" width="488" height="488" rx="112" fill="#070a18" stroke="url(#edge)" stroke-width="8"/>
-<path d="M100 106H408L350 174H285V350L218 382V174H100Z" fill="url(#g)" filter="url(#glow)"/>
-<path d="M90 306C120 380 255 368 383 246C426 205 437 158 416 132" fill="none" stroke="url(#ring)" stroke-width="25" stroke-linecap="round" filter="url(#glow)"/>
-<path d="M388 119L418 91L426 132" fill="none" stroke="#f5f7ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M365 87L372 67L379 87L399 94L379 101L372 121L365 101L345 94Z" fill="#fff" filter="url(#glow)"/>
+<path d="M94 112H418L350 184H282V394L218 348V184H94Z" fill="url(#silver)"/>
+<path d="M94 112L164 184H218V112Z" fill="#e6e7e9"/>
+<path d="M418 112L350 184H282V112Z" fill="#777a80"/>
+<path d="M218 184L282 184V394L218 348Z" fill="url(#side)"/>
+<path d="M92 310C124 387 267 361 390 244C434 202 431 164 393 149" fill="none" stroke="url(#ring)" stroke-width="7" stroke-linecap="round"/>
+<path d="M393 149L405 137L411 155" fill="none" stroke="#e7e7e9" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M447 64L453 84L473 90L453 96L447 116L441 96L421 90L441 84Z" fill="#e6e7e9"/>
 </svg>
