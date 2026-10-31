@@ -23,7 +23,7 @@ button,textarea,input{font:inherit}button{cursor:pointer}
 .nav-label{padding:8px 9px 4px;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
 .search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);outline:none}
 .search:focus,.composer textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
-.history{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:var(--accent2) var(--panel2);display:flex;flex-direction:column;gap:4px}
+.history{flex:1 1 0;min-height:0;max-height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:var(--accent2) var(--panel2);display:flex;flex-direction:column;gap:4px}
 .history-item{display:flex;align-items:center;gap:9px;width:100%;padding:10px;border:0;border-radius:9px;background:transparent;color:var(--muted);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.87rem}
 .history-item span{overflow:hidden;text-overflow:ellipsis}
 .history-item:hover,.history-item.active{background:var(--panel2);color:var(--ink)}
@@ -32,14 +32,14 @@ button,textarea,input{font:inherit}button{cursor:pointer}
 .side-action:hover{background:var(--panel2);color:var(--ink)}
 .profile{display:flex;align-items:center;gap:10px;padding:10px 8px 2px;color:var(--muted);font-size:.83rem}
 .avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);color:var(--accent);font-weight:700}
-.main{min-width:0;min-height:0;height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.main{min-width:0;min-height:0;height:100%;max-height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden}
 .topbar{height:64px;flex:none;position:sticky;top:0;z-index:4;display:flex;align-items:center;justify-content:space-between;padding:0 26px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(16px)}
 .top-left{display:flex;align-items:center;gap:12px}.mobile-brand{display:none;font-family:"Space Grotesk",sans-serif;font-weight:700}
 .page-label{font-size:.9rem;color:var(--muted)}.status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:.78rem}
 .status-dot{width:7px;height:7px;border-radius:50%;background:#48d7a6;box-shadow:0 0 12px #48d7a6}
 .icon-btn{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--muted)}
 .icon-btn:hover{color:var(--ink);border-color:var(--accent)}
-.conversation{flex:1 1 0;height:0;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:var(--accent2) var(--panel2);padding:28px 22px 24px}
+.conversation{display:block;flex:1 1 0;height:0;min-width:0;min-height:0;max-height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:var(--accent2) var(--panel2);padding:28px 22px 24px}
 .content{width:100%;max-width:820px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
 .welcome{margin:auto auto 36px;width:100%;text-align:center;padding:20px 0 8px}
 .welcome-mark{width:82px;height:82px;margin:0 auto 22px;display:block;object-fit:contain;filter:drop-shadow(0 8px 24px #713cff55)}
