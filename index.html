@@ -14,7 +14,7 @@
 :root[data-theme="light"]{color-scheme:light;--bg:#f7f9fc;--sidebar:#eef2f7;--panel:#fff;--panel2:#f1f5fa;--ink:#172235;--muted:#65738a;--line:#dce3ec;--accent:#087f68;--accent2:#2869b2;--user:#e1f3ef;--shadow:0 18px 60px #19304b12}
 *{box-sizing:border-box}html,body{min-height:100%;margin:0}body{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;overflow-x:hidden;overflow-y:auto}
 button,textarea,input{font:inherit}button{cursor:pointer}
-.app{min-height:100dvh;display:grid;grid-template-columns:270px minmax(0,1fr);grid-template-rows:minmax(100dvh,auto);background:var(--bg)}
+.app{height:100dvh;min-height:100dvh;display:grid;grid-template-columns:270px minmax(0,1fr);grid-template-rows:minmax(0,1fr);overflow:hidden;background:var(--bg)}
 .sidebar{background:var(--sidebar);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;padding:18px 14px;gap:16px}
 .brand{display:flex;align-items:center;gap:11px;padding:4px 8px 12px;font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:1.15rem;letter-spacing:-.04em}
 .logo{width:38px;height:38px;flex:none;display:block;object-fit:contain;border-radius:11px;filter:drop-shadow(0 4px 12px #6d35ff55)}
@@ -32,15 +32,15 @@ button,textarea,input{font:inherit}button{cursor:pointer}
 .side-action:hover{background:var(--panel2);color:var(--ink)}
 .profile{display:flex;align-items:center;gap:10px;padding:10px 8px 2px;color:var(--muted);font-size:.83rem}
 .avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);color:var(--accent);font-weight:700}
-.main{min-width:0;min-height:100dvh;height:auto;overflow:visible;display:flex;flex-direction:column;position:relative}
+.main{min-width:0;min-height:0;height:100dvh;overflow:hidden;display:flex;flex-direction:column;position:relative}
 .topbar{height:64px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(16px)}
 .top-left{display:flex;align-items:center;gap:12px}.mobile-brand{display:none;font-family:"Space Grotesk",sans-serif;font-weight:700}
 .page-label{font-size:.9rem;color:var(--muted)}.status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:.78rem}
 .status-dot{width:7px;height:7px;border-radius:50%;background:#48d7a6;box-shadow:0 0 12px #48d7a6}
 .icon-btn{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--muted)}
 .icon-btn:hover{color:var(--ink);border-color:var(--accent)}
-.conversation{flex:1 0 auto;min-width:0;min-height:calc(100dvh - 190px);height:auto;overflow:visible;overscroll-behavior:auto;padding:34px 22px 22px}
-.content{max-width:820px;margin:0 auto;min-height:calc(100dvh - 190px);display:flex;flex-direction:column}
+.conversation{flex:1 1 auto;min-width:0;min-height:0;height:auto;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scroll-behavior:smooth;padding:34px 22px 22px}
+.content{max-width:820px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
 .welcome{margin:auto auto 36px;width:100%;text-align:center;padding:20px 0 8px}
 .welcome-mark{width:82px;height:82px;margin:0 auto 22px;display:block;object-fit:contain;filter:drop-shadow(0 8px 24px #713cff55)}
 h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-height:1.08;letter-spacing:-.065em;margin:0 0 12px}
@@ -77,7 +77,7 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 .disclaimer{text-align:center;color:var(--muted);font-size:.7rem;margin:9px 0 0}
 .mobile-menu{display:none}
 .empty-history{padding:12px 9px;color:var(--muted);font-size:.82rem}
-@media(max-width:800px){.app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:10;inset:0 auto 0 0;width:min(290px,86vw);transform:translateX(-102%);transition:transform .22s ease;box-shadow:var(--shadow)}.sidebar.open{transform:translateX(0)}.mobile-menu{display:grid}.mobile-brand{display:block}.main{grid-template-rows:58px minmax(0,1fr) auto}.topbar{padding:0 14px}.page-label,.status{display:none}.conversation{padding:24px 15px 15px}.composer-wrap{padding:8px 12px max(14px,env(safe-area-inset-bottom))}.suggestions{grid-template-columns:1fr;max-width:440px;margin-top:24px}.welcome{padding:18px 0 0}.hint{display:none}}
+@media(max-width:800px){.app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:10;inset:0 auto 0 0;width:min(290px,86vw);transform:translateX(-102%);transition:transform .22s ease;box-shadow:var(--shadow)}.sidebar.open{transform:translateX(0)}.mobile-menu{display:grid}.mobile-brand{display:block}.main{grid-template-rows:58px minmax(0,1fr) auto;height:100dvh;min-height:0}.conversation{min-height:0}.topbar{padding:0 14px}.page-label,.status{display:none}.conversation{padding:24px 15px 15px}.composer-wrap{padding:8px 12px max(14px,env(safe-area-inset-bottom))}.suggestions{grid-template-columns:1fr;max-width:440px;margin-top:24px}.welcome{padding:18px 0 0}.hint{display:none}}
 @media(max-width:420px){.brand{padding-left:2px}.topbar{height:58px}.welcome-mark{width:68px;height:68px}.welcome p{font-size:.9rem}.message{gap:9px;grid-template-columns:29px minmax(0,1fr)}.message.user{grid-template-columns:minmax(0,1fr) 29px}.msg-avatar{width:29px;height:29px}.msg-body{font-size:.92rem}.composer{border-radius:16px}.mode-select{max-width:135px}}
 </style>
 </head>
@@ -144,7 +144,7 @@ function makeChat(){const c={id:uid(),title:'New conversation',messages:[],updat
 function titleFrom(text){const t=text.trim().replace(/\s+/g,' ');return t.length>34?t.slice(0,34)+'…':t||'New conversation'}
 function renderHistory(){const term=search.value.trim().toLowerCase();historyEl.replaceChildren();const list=chats.filter(c=>c.title.toLowerCase().includes(term));if(!list.length){const e=document.createElement('div');e.className='empty-history';e.textContent=chats.length?'No matching chats.':'Your recent chats will appear here.';historyEl.append(e);return}list.forEach(c=>{const b=document.createElement('button');b.className='history-item'+(c.id===activeId?' active':'');b.type='button';const ico=document.createElement('span');ico.textContent='◌';const label=document.createElement('span');label.textContent=c.title;b.append(ico,label);b.title=c.title;b.onclick=()=>{activeId=c.id;renderHistory();renderChat();sidebar.classList.remove('open')};historyEl.append(b)})}
 function addMessage(role,text,actions=true){const row=document.createElement('article');row.className='message '+(role==='user'?'user':'assistant');const avatar=document.createElement('div');avatar.className='msg-avatar';avatar.textContent=role==='user'?'Y':'✦';const body=document.createElement('div');body.className='msg-body';body.textContent=text;row.append(avatar,body);if(role!=='user'&&actions){const tools=document.createElement('div');tools.className='message-actions';const copy=document.createElement('button');copy.type='button';copy.textContent='Copy';copy.onclick=()=>{if(navigator.clipboard?.writeText)navigator.clipboard.writeText(text).then(()=>{copy.textContent='Copied';setTimeout(()=>copy.textContent='Copy',1200)}).catch(()=>{});};tools.append(copy);row.append(tools)}messagesEl.append(row);return row}
-function scrollToLatest(){window.scrollTo({top:document.documentElement.scrollHeight,behavior:'auto'})}
+function scrollToLatest(){requestAnimationFrame(()=>{conversation.scrollTo({top:conversation.scrollHeight,behavior:'smooth'});})}
 function renderChat(){messagesEl.replaceChildren();const c=active();welcome.hidden=!!(c&&c.messages.length);if(c){c.messages.forEach(m=>addMessage(m.role,m.text,m.role!=='user'));pageLabel.textContent=c.title}else pageLabel.textContent='New conversation';scrollToLatest()}
 function setBusy(v){busy=v;send.disabled=v||!input.value.trim();input.disabled=v;mode.disabled=v}
 function showTyping(task='chat'){const row=document.createElement('article');row.className='message assistant';row.id='typing';const a=document.createElement('div');a.className='msg-avatar';a.textContent='✦';const b=document.createElement('div');b.className='msg-body';if(task==='debate'){const plan=document.createElement('div');plan.className='debate-steps';const title=document.createElement('div');title.className='debate-steps-title';title.textContent='THREE-ROUND DEBATE';plan.append(title);[['1','Independent analysis'],['2','Challenge and rebuttal'],['3','Final judgment']].forEach(([n,label])=>{const step=document.createElement('div');step.className='debate-step';const number=document.createElement('span');number.className='debate-step-number';number.textContent=n;const text=document.createElement('span');text.textContent=label;step.append(number,text);plan.append(step)});b.append(plan)}const dots=document.createElement('span');dots.className='typing';dots.innerHTML='<i></i><i></i><i></i>';b.append(dots);row.append(a,b);messagesEl.append(row);scrollToLatest()}
