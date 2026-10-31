@@ -1,6 +1,17 @@
 const MAX_HISTORY_MESSAGES = 12;
 const MAX_HISTORY_CHARS = 18000;
 const MAX_MESSAGE_CHARS = 5000;
+const MAX_TOPIC_CHARS = 1200;
+const REQUEST_TIMEOUT_MS = 40000;
+
+function isComplexRequest(message) {
+  const text = String(message || "");
+  return text.length > 700 || /\\b(architecture|system design|step by step|in depth|deep dive|compare|evaluate|debug|optimise|optimize|research|strategy|trade.?offs|proof|derive|multiple constraints)\\b/i.test(text);
+}
+
+function cleanText(value, max = MAX_TOPIC_CHARS) {
+  return typeof value === "string" ? value.trim().slice(0, max) : "";
+}
 
 function getChatMode(message) {
   const text = String(message || "").toLowerCase();
@@ -79,9 +90,9 @@ async function callGroq(apiKey, systemInstruction, input, messages, task, mode) 
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: "Bearer " + apiKey },
-    signal: AbortSignal.timeout(35000),
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     body: JSON.stringify({
-      model: "openai/gpt-oss-120b",
+      model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
       messages: groqMessages,
       temperature: mode === "creative" ? 0.7 : 0.35,
       max_tokens: task === "debate" ? 2200 : mode === "coding" || mode === "reasoning" ? 2200 : 1400
@@ -151,7 +162,11 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
-    const { task = "chat", topic = "", messages = [] } = req.body || {};
+    const body = req.body && typeof req.body === "object" ? req.body : {};
+    const { task = "chat", topic = "", messages = [] } = body;
+    if (!["chat", "debate", "definition"].includes(task)) {
+      return res.status(400).json({ error: "Unsupported task type." });
+    }
     const geminiKey = process.env.GEMINI_API_KEY;
     const groqKey = process.env.GROQ_API_KEY;
     const claudeKey = process.env.ANTHROPIC_API_KEY;
@@ -164,11 +179,11 @@ export default async function handler(req, res) {
     if (task === "debate") {
       if (typeof topic !== "string" || !topic.trim()) return res.status(400).json({ error: "A topic is required." });
       systemInstruction = THINKORA_DEBATE_INSTRUCTION;
-      input = "Analyse this debate topic using the required three-round structure:\n\n" + topic.slice(0, 1000);
+      input = "Analyse this debate topic using the required three-round structure:\n\n" + cleanText(topic, MAX_TOPIC_CHARS);
     } else if (task === "definition") {
       if (typeof topic !== "string" || !topic.trim()) return res.status(400).json({ error: "A topic is required." });
       systemInstruction = THINKORA_DEFINITION_INSTRUCTION;
-      input = "Write 2 or 3 complete, well-developed paragraphs explaining the topic, its context, and why it matters. Stay neutral. Topic: " + topic.slice(0, 1000);
+      input = "Write 2 or 3 complete, well-developed paragraphs explaining the topic, its context, and why it matters. Stay neutral. Topic: " + cleanText(topic, MAX_TOPIC_CHARS);
     } else {
       safeMessages = trimConversation(messages);
       if (!safeMessages.length || safeMessages[safeMessages.length - 1].role !== "user") {
@@ -182,7 +197,7 @@ export default async function handler(req, res) {
         safeMessages.map(message => (message.role === "model" ? "Assistant: " : "User: ") + message.text).join("\n\n");
     }
 
-    const outputTokens = task === "debate" ? 2400 : mode === "coding" || mode === "reasoning" ? 2200 : 1400;
+    const latestPrompt = safeMessages.length ? safeMessages[safeMessages.length - 1].text : input;\n    const complexRequest = isComplexRequest(latestPrompt);\n    const outputTokens = task === "debate" ? 3000 : complexRequest ? 3000 : mode === "coding" || mode === "reasoning" ? 2400 : 1600;
     let geminiFailure = null;
 
     if (geminiKey) {
@@ -192,11 +207,11 @@ export default async function handler(req, res) {
           headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
           signal: AbortSignal.timeout(35000),
           body: JSON.stringify({
-            model: "gemini-3.8-flash",
+            model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
             input,
             system_instruction: systemInstruction,
             generation_config: {
-              thinking_level: mode === "reasoning" || mode === "coding" ? "medium" : "low",
+              thinking_level: complexRequest ? "high" : mode === "reasoning" || mode === "coding" ? "medium" : "low",
               max_output_tokens: outputTokens
             },
             store: false
@@ -212,7 +227,7 @@ export default async function handler(req, res) {
               .filter(part => part.type === "text" && typeof part.text === "string")
               .map(part => part.text).join("\n").trim();
           }
-          if (reply) return res.status(200).json({ reply, model: "gemini-3.8-flash", provider: "Gemini", mode });
+          if (reply) return res.status(200).json({ reply, model: process.env.GEMINI_MODEL || "gemini-3.8-flash", provider: "Gemini", mode, depth: complexRequest ? "deep" : "standard" });
           geminiFailure = "Gemini returned an empty response.";
         } else {
           const detail = data?.error?.message || "Gemini request failed (" + response.status + ").";
@@ -249,7 +264,7 @@ export default async function handler(req, res) {
     if (groqKey) {
       try {
         const reply = await callGroq(groqKey, systemInstruction, input, safeMessages, task, mode);
-        return res.status(200).json({ reply, model: "openai/gpt-oss-120b", provider: "Groq", mode, fallback: true });
+        return res.status(200).json({ reply, model: process.env.GROQ_MODEL || "openai/gpt-oss-120b", provider: "Groq", mode, depth: complexRequest ? "deep" : "standard", fallback: true });
       } catch (error) {
         console.error("Groq fallback error:", error);
         return res.status(502).json({
