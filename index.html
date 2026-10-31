@@ -73,7 +73,7 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 .mode-select{border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--muted);padding:7px 10px;font-size:.78rem;outline:none}
 .hint{font-size:.72rem;color:var(--muted)}
 .send{width:36px;height:36px;border:0;border-radius:11px;background:var(--accent);color:#06150f;display:grid;place-items:center;font-size:18px;font-weight:800;transition:.18s}
-.send:disabled{opacity:.35;cursor:not-allowed}.send:not(:disabled):hover{transform:translateY(-1px);filter:brightness(1.08)}
+.send:disabled{opacity:.35;cursor:not-allowed}.send{position:relative;z-index:6;pointer-events:auto;touch-action:manipulation}.send:not(:disabled):hover{transform:translateY(-1px);filter:brightness(1.08)}
 .mic-icon{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}.mic-btn{width:36px;height:36px;flex:none;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:var(--panel2);color:var(--muted);transition:.18s}.mic-btn:hover:not(:disabled){color:var(--ink);border-color:var(--accent)}.mic-btn:disabled{opacity:.35;cursor:not-allowed}.mic-btn.listening{background:color-mix(in srgb,#ef6262 18%,var(--panel));border-color:#ef6262;color:#ff7777;animation:micPulse 1.2s infinite}@keyframes micPulse{50%{box-shadow:0 0 0 5px #ef626222}}
 .disclaimer{text-align:center;color:var(--muted);font-size:.7rem;margin:9px 0 0}
 .mobile-menu{display:none}
@@ -157,6 +157,7 @@ try{const payload=task==='debate'?{task:'debate',topic:prompt}:{task:'chat',mess
 catch(error){$('typing')?.remove();const msg=error.message||'Something went wrong. Please try again.';addMessage('model','I could not complete that request: '+msg);c.messages.pop();save()}
 finally{setBusy(false);input.focus();scrollToLatest()}}
 form.addEventListener('submit',e=>{e.preventDefault();submit(input.value)});
+send.addEventListener('click',e=>{e.preventDefault();if(!busy&&input.value.trim())submit(input.value)});
 input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,180)+'px';send.disabled=busy});
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
 let recognition=null,listening=false,voiceBase='',finalTranscript='';
