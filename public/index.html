@@ -170,6 +170,8 @@ form.addEventListener('submit',()=>{if(listening&&recognition)recognition.stop()
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
 document.querySelectorAll('.suggestion').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.prompt;input.dispatchEvent(new Event('input'));input.focus()}));
 $('newChat').onclick=makeChat;
+$('codeLabNav').onclick=()=>{mode.value='code';input.placeholder='Describe the code you want to build or debug...';input.focus();sidebar.classList.remove('open');pageLabel.textContent='Code Lab'};
+mode.addEventListener('change',()=>{input.placeholder=mode.value==='code'?'Describe the code you want to build or debug...':mode.value==='debate'?'Enter a topic to debate...':'Message Thinkora...';});
 search.addEventListener('input',renderHistory);
 function toggleTheme(){const next=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=next;try{localStorage.setItem(THEME,next)}catch{}}
 $('themeToggle').onclick=toggleTheme;$('topTheme').onclick=toggleTheme;
