@@ -1,8 +1,8 @@
-const MAX_HISTORY_MESSAGES = 12;
-const MAX_HISTORY_CHARS = 18000;
+const MAX_HISTORY_MESSAGES = 8;
+const MAX_HISTORY_CHARS = 10000;
 const MAX_MESSAGE_CHARS = 5000;
 const MAX_TOPIC_CHARS = 1200;
-const REQUEST_TIMEOUT_MS = 40000;
+const REQUEST_TIMEOUT_MS = 30000;
 
 function isComplexRequest(message) {
   const text = String(message || "");
@@ -197,7 +197,7 @@ export default async function handler(req, res) {
 
     const latestPrompt = safeMessages.length ? safeMessages[safeMessages.length - 1].text : input;
     const complexRequest = isComplexRequest(latestPrompt);
-    const outputTokens = task === "debate" ? 3000 : complexRequest ? 3000 : mode === "coding" || mode === "reasoning" ? 2400 : 1600;
+    const outputTokens = task === "debate" ? 2200 : complexRequest ? (mode === "coding" ? 2000 : 1500) : mode === "coding" ? 1600 : mode === "reasoning" ? 1300 : mode === "learning" ? 1000 : mode === "creative" ? 900 : 750;
     const modelName = complexRequest && reasoningModelName ? reasoningModelName : defaultModelName;
 
     const reply = await callThinkoraModel(
