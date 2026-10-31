@@ -111,8 +111,11 @@ async function callThinkoraModel(endpoint, model, apiKey, systemInstruction, inp
   });
 
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const detail = data?.error?.message || data?.error || "Thinkora model server returned HTTP " + response.status + ".";
+  if (!response.ok || data?.success === false) {
+    const cloudflareError = Array.isArray(data?.errors)
+      ? data.errors.map(item => typeof item === "string" ? item : (item?.message || item?.code || "")).filter(Boolean).join("; ")
+      : "";
+    const detail = data?.error?.message || data?.error || cloudflareError || "Thinkora model server returned HTTP " + response.status + ".";
     throw new Error(String(detail).slice(0, 220));
   }
   // Cloudflare Workers AI may return either a standard OpenAI response or
@@ -170,6 +173,11 @@ export default async function handler(req, res) {
     if (!modelEndpoint) {
       return res.status(503).json({
         error: "Thinkora's self-hosted model is not connected yet. Configure THINKORA_MODEL_URL in Vercel Environment Variables."
+      });
+    }
+    if (!modelApiKey || !modelApiKey.trim()) {
+      return res.status(503).json({
+        error: "Thinkora's Cloudflare model token is missing. Add THINKORA_MODEL_API_KEY to Vercel Production Environment Variables, then redeploy."
       });
     }
 
