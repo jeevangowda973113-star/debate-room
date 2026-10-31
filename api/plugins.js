@@ -11,8 +11,8 @@ function runBuiltin(id, input) {
   const value = String(input ?? "");
   if (value.length > 30000) throw new Error("Input is too long (maximum 30,000 characters).");
   if (id === "calculator") {
-    const s = value.replace(/\\s+/g, "");
-    if (!s || s.length > 180 || !/^[0-9.+*/()%\\-^]+$/.test(s)) throw new Error("Enter a valid arithmetic expression.");
+    const s = value.replace(/\s+/g, "");
+    if (!s || s.length > 180 || !/^[0-9.+*/()%\-^]+$/.test(s)) throw new Error("Enter a valid arithmetic expression.");
     let i = 0, peek = () => s[i] || "", eat = c => peek() === c ? (i++, true) : false;
     const atom = () => { if (eat("+")) return atom(); if (eat("-")) return -atom(); if (eat("(")) { const n = sum(); if (!eat(")")) throw new Error("Missing closing bracket."); return n; } const start=i; while (/[0-9.]/.test(peek())) i++; if (start===i) throw new Error("Expected a number."); const n=Number(s.slice(start,i)); if(!Number.isFinite(n)) throw new Error("Invalid number."); return n; };
     const power = () => { let n=atom(); if(eat("^")) n=Math.pow(n,power()); return n; };
@@ -22,8 +22,8 @@ function runBuiltin(id, input) {
     return { result: String(Number(result.toPrecision(12))) };
   }
   if (id === "json-tools") { let parsed; try { parsed=JSON.parse(value); } catch(e) { throw new Error("Invalid JSON: "+e.message); } return { result: JSON.stringify(parsed,null,2), compact: JSON.stringify(parsed) }; }
-  if (id === "text-insights") { const words=value.trim()?value.trim().split(/\\s+/).length:0; const sentences=value.trim()?(value.match(/[.!?]+(?=\\s|$)/g)||[]).length:0; return { result: "Words: "+words+"\\nCharacters: "+value.length+"\\nCharacters (without spaces): "+value.replace(/\\s/g,"").length+"\\nSentences: "+sentences+"\\nEstimated reading time: "+(words?Math.max(1,Math.ceil(words/200))+" min":"0 min") }; }
-  if (id === "slug-maker") return { result: value.normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,180) };
+  if (id === "text-insights") { const words=value.trim()?value.trim().split(/\s+/).length:0; const sentences=value.trim()?(value.match(/[.!?]+(?=\s|$)/g)||[]).length:0; return { result: "Words: "+words+"\nCharacters: "+value.length+"\nCharacters (without spaces): "+value.replace(/\s/g,"").length+"\nSentences: "+sentences+"\nEstimated reading time: "+(words?Math.max(1,Math.ceil(words/200))+" min":"0 min") }; }
+  if (id === "slug-maker") return { result: value.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,180) };
   throw new Error("Unknown or unavailable built-in plugin.");
 }
 
