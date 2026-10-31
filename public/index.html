@@ -90,6 +90,8 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
  <div class="brand"><img class="logo" src="/thinkora-mark.svg" alt="Thinkora logo"><span>Thinkora</span></div>
  <button class="new-chat" id="newChat"><span>＋</span> New chat</button>
  <button class="new-chat" id="codeLabNav"><span>⌘</span> Code Lab</button>
+ <button class="new-chat" id="pluginStoreNav"><span>▦</span> Plugin Store</button>
+ <button class="new-chat" id="developerStudioNav"><span>⚙</span> Developer Studio</button>
  <div class="nav-label">Your conversations</div>
  <input class="search" id="searchHistory" type="search" placeholder="⌕  Search chats" aria-label="Search conversations">
  <div class="history" id="history"><div class="empty-history">Your recent chats will appear here.</div></div>
@@ -171,6 +173,10 @@ input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventD
 document.querySelectorAll('.suggestion').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.prompt;input.dispatchEvent(new Event('input'));input.focus()}));
 $('newChat').onclick=makeChat;
 $('codeLabNav').onclick=()=>{mode.value='code';input.placeholder='Describe the code you want to build or debug...';input.focus();sidebar.classList.remove('open');pageLabel.textContent='Code Lab'};
+function showToolPage(title,description,items){messagesEl.replaceChildren();welcome.hidden=true;const wrap=document.createElement('section');wrap.style.cssText='width:100%;max-width:760px;margin:24px auto;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--panel)';const h=document.createElement('h2');h.textContent=title;h.style.cssText='font-family:Space Grotesk,sans-serif;margin:0 0 8px';const p=document.createElement('p');p.textContent=description;p.style.cssText='color:var(--muted);line-height:1.6;margin:0 0 18px';wrap.append(h,p);items.forEach(item=>{const card=document.createElement('div');card.style.cssText='padding:13px 0;border-top:1px solid var(--line)';const strong=document.createElement('strong');strong.textContent=item.name;const detail=document.createElement('p');detail.textContent=item.detail;detail.style.cssText='color:var(--muted);font-size:.88rem;margin:5px 0 0';card.append(strong,detail);wrap.append(card)});messagesEl.append(wrap);pageLabel.textContent=title;sidebar.classList.remove('open');scrollToLatest()}
+$('pluginStoreNav').onclick=()=>showToolPage('Plugin Store','Discover integrations for Thinkora. Real plugin installation will be enabled after secure accounts, permissions and the plugin registry are connected.',[{name:'Web Search',detail:'Search the web and summarize trusted sources. Not installed yet.'},{name:'File Reader',detail:'Analyze documents you upload. Not installed yet.'},{name:'Calculator',detail:'Perform calculations and unit conversions. Not installed yet.'},{name:'Custom Plugins',detail:'Install community-built integrations after review and approval.'}]);
+$('developerStudioNav').onclick=()=>showToolPage('Developer Studio','Build and submit plugins for review. Public publishing requires developer accounts, server-side validation and a secure execution environment.',[{name:'Plugin manifest',detail:'Define a plugin name, description, version and permitted actions.'},{name:'API connection',detail:'Keep credentials on the server and request only necessary permissions.'},{name:'Submit for review',detail:'Publishing will be enabled after the backend registry and review process are configured.'}]);
+
 mode.addEventListener('change',()=>{input.placeholder=mode.value==='code'?'Describe the code you want to build or debug...':mode.value==='debate'?'Enter a topic to debate...':'Message Thinkora...';});
 search.addEventListener('input',renderHistory);
 function toggleTheme(){const next=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=next;try{localStorage.setItem(THEME,next)}catch{}}
