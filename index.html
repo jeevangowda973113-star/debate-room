@@ -1,448 +1,169 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Thinkora — Debate Room</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090d16">
+<title>Thinkora AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#EEF1F5;--panel:#fff;--ink:#1B2433;--mute:#5B6678;--line:#D5DBE4;--for:#12807F;--against:#8A3FA8;--neutral:#AEB6C2;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141A24;--panel:#1C2430;--ink:#E6EAF0;--mute:#9AA5B5;--line:#2B3544;--for:#3CC1BC;--against:#C28BDB;--neutral:#4A5566}}
-:root[data-theme="dark"]{--bg:#141A24;--panel:#1C2430;--ink:#E6EAF0;--mute:#9AA5B5;--line:#2B3544;--for:#3CC1BC;--against:#C28BDB;--neutral:#4A5566}
-*{box-sizing:border-box}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
-.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 40px}
-h1{font-size:clamp(2.2rem,6vw,4rem);line-height:1;margin:0 0 6px;font-weight:800;letter-spacing:-.02em}
-.sub{color:var(--mute);margin:0 0 26px;max-width:60ch}
-.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;align-items:start}
-@media(max-width:860px){.layout{grid-template-columns:1fr}}
-.room{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
-@media(max-width:560px){.room{grid-template-columns:1fr}}
-.panel h2{font-size:.95rem;margin:0;font-weight:600}
-.mean{font-size:.85rem;color:var(--mute);margin:0 0 8px;min-height:1.3em}
-.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
-.dot{aspect-ratio:1;border-radius:50%;background:var(--neutral);border:0;padding:0;cursor:pointer;transition:background .7s}
-.dot:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
-@media(prefers-reduced-motion:reduce){.dot{transition:none}}
-.detail{grid-column:1/-1;border-top:1px solid var(--line);padding-top:10px;color:var(--mute);font-size:.9rem;min-height:2.6em}
-.legend{display:flex;gap:14px;align-items:center;font-size:.85rem;color:var(--mute);margin-top:10px}
-.bar{flex:1;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--against),var(--neutral),var(--for))}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
-.card h3{margin:0 0 8px;font-size:1rem}
-textarea{width:100%;min-height:84px;resize:vertical;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
-.chip{font:inherit;font-size:.82rem;color:var(--ink);background:none;border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer}
-.go{font:inherit;font-weight:600;background:var(--ink);color:var(--bg);border:0;border-radius:10px;padding:10px 18px;cursor:pointer}
-.go:disabled{opacity:.5;cursor:default}
-#status{margin:10px 0 0;color:var(--mute);font-size:.9rem;min-height:1.3em}
-table{width:100%;border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums}
-th,td{text-align:right;padding:4px 6px;border-bottom:1px solid var(--line)}
-th:first-child,td:first-child{text-align:left}
-th{font-weight:600;color:var(--mute)}
-.verdict{font-size:1.5rem;font-weight:800;margin:0 0 4px}
-.muted{color:var(--mute);font-size:.9rem}
-ul{margin:6px 0 0;padding-left:18px}li{margin-bottom:4px}
-.note{margin-top:18px;font-size:.82rem;color:var(--mute);max-width:80ch}
+:root{color-scheme:dark;--bg:#090d16;--sidebar:#0c111c;--panel:#111927;--panel2:#151f30;--ink:#edf3ff;--muted:#94a2b8;--line:#263246;--accent:#65e6c1;--accent2:#76b9ff;--user:#193a3b;--shadow:0 18px 60px #0005}
+:root[data-theme="light"]{color-scheme:light;--bg:#f7f9fc;--sidebar:#eef2f7;--panel:#fff;--panel2:#f1f5fa;--ink:#172235;--muted:#65738a;--line:#dce3ec;--accent:#087f68;--accent2:#2869b2;--user:#e1f3ef;--shadow:0 18px 60px #19304b12}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;overflow:hidden}
+button,textarea,input{font:inherit}button{cursor:pointer}
+.app{height:100dvh;display:grid;grid-template-columns:270px minmax(0,1fr);background:var(--bg)}
+.sidebar{background:var(--sidebar);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;padding:18px 14px;gap:16px}
+.brand{display:flex;align-items:center;gap:11px;padding:4px 8px 12px;font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:1.15rem;letter-spacing:-.04em}
+.logo{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;color:#06140f;background:linear-gradient(140deg,#a0f5d9,#56d8b4);box-shadow:0 6px 24px #5de4bc30;font-size:19px}
+.new-chat{width:100%;display:flex;align-items:center;gap:10px;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);font-weight:600;text-align:left;transition:.18s}
+.new-chat:hover{border-color:var(--accent);background:var(--panel2)}
+.nav-label{padding:8px 9px 4px;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+.search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);outline:none}
+.search:focus,.composer textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
+.history{flex:1;overflow:auto;min-height:60px;display:flex;flex-direction:column;gap:4px}
+.history-item{display:flex;align-items:center;gap:9px;width:100%;padding:10px;border:0;border-radius:9px;background:transparent;color:var(--muted);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.87rem}
+.history-item span{overflow:hidden;text-overflow:ellipsis}
+.history-item:hover,.history-item.active{background:var(--panel2);color:var(--ink)}
+.sidebar-bottom{border-top:1px solid var(--line);padding-top:12px;display:grid;gap:6px}
+.side-action{display:flex;align-items:center;gap:10px;padding:10px;border:0;border-radius:9px;background:transparent;color:var(--muted);text-align:left}
+.side-action:hover{background:var(--panel2);color:var(--ink)}
+.profile{display:flex;align-items:center;gap:10px;padding:10px 8px 2px;color:var(--muted);font-size:.83rem}
+.avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);color:var(--accent);font-weight:700}
+.main{min-width:0;display:flex;flex-direction:column;height:100%;position:relative}
+.topbar{height:64px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(16px)}
+.top-left{display:flex;align-items:center;gap:12px}.mobile-brand{display:none;font-family:"Space Grotesk",sans-serif;font-weight:700}
+.page-label{font-size:.9rem;color:var(--muted)}.status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:.78rem}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#48d7a6;box-shadow:0 0 12px #48d7a6}
+.icon-btn{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--muted)}
+.icon-btn:hover{color:var(--ink);border-color:var(--accent)}
+.conversation{flex:1;overflow:auto;scroll-behavior:smooth;padding:34px 22px 22px}
+.content{max-width:820px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+.welcome{margin:auto auto 36px;width:100%;text-align:center;padding:20px 0 8px}
+.welcome-mark{width:58px;height:58px;margin:0 auto 22px;border-radius:20px;display:grid;place-items:center;background:linear-gradient(145deg,#a0f5d9,#52d5b0);color:#06150f;font-size:27px;box-shadow:0 12px 38px #52d5b025}
+h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-height:1.08;letter-spacing:-.065em;margin:0 0 12px}
+.welcome p{color:var(--muted);margin:0;font-size:1rem}
+.suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:30px auto 0;max-width:660px}
+.suggestion{padding:14px 15px;text-align:left;border:1px solid var(--line);border-radius:13px;background:var(--panel);color:var(--muted);font-size:.87rem;line-height:1.45;transition:.18s}
+.suggestion strong{display:block;color:var(--ink);font-size:.9rem;margin-bottom:4px}
+.suggestion:hover{border-color:var(--accent);transform:translateY(-1px);color:var(--ink)}
+.messages{display:flex;flex-direction:column;gap:24px;padding:4px 0 26px}
+.message{display:grid;grid-template-columns:34px minmax(0,1fr);gap:13px;align-items:start;animation:appear .2s ease}
+@keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.message.user{grid-template-columns:minmax(0,1fr) 34px}
+.message.user .msg-avatar{grid-column:2;grid-row:1;background:var(--user);color:var(--accent2)}
+.message.user .msg-body{grid-column:1;grid-row:1;justify-self:end;background:var(--user);border:1px solid color-mix(in srgb,var(--accent) 15%,var(--line));border-radius:17px 5px 17px 17px;padding:12px 16px;max-width:min(90%,650px)}
+.msg-avatar{width:32px;height:32px;border-radius:11px;display:grid;place-items:center;background:var(--panel2);color:var(--accent);font-size:15px;font-weight:700}
+.msg-body{min-width:0;padding:3px 0;color:var(--ink);font-size:.96rem;line-height:1.75;overflow-wrap:anywhere;white-space:pre-wrap}
+.message.assistant .msg-body{max-width:740px}
+.message-actions{display:flex;gap:6px;margin-top:9px}
+.message-actions button{border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--muted);padding:5px 9px;font-size:.75rem}
+.message-actions button:hover{color:var(--ink);border-color:var(--accent)}
+.typing{display:inline-flex;gap:5px;padding:10px 0}.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:pulse 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}@keyframes pulse{50%{opacity:.3;transform:translateY(-3px)}}
+.composer-wrap{flex:none;padding:10px 22px max(20px,env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 18%)}
+.composer-area{max-width:820px;margin:auto}
+.composer{border:1px solid var(--line);border-radius:19px;background:var(--panel);box-shadow:var(--shadow);padding:12px 13px 10px;transition:.18s}
+.composer:focus-within{border-color:color-mix(in srgb,var(--accent) 70%,var(--line))}
+.composer textarea{display:block;width:100%;min-height:34px;max-height:180px;resize:none;border:0;outline:0;background:transparent;color:var(--ink);padding:4px 4px 8px;line-height:1.5}
+.composer textarea::placeholder{color:var(--muted)}
+.composer-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.composer-tools{display:flex;align-items:center;gap:8px}
+.mode-select{border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--muted);padding:7px 10px;font-size:.78rem;outline:none}
+.hint{font-size:.72rem;color:var(--muted)}
+.send{width:36px;height:36px;border:0;border-radius:11px;background:var(--accent);color:#06150f;display:grid;place-items:center;font-size:18px;font-weight:800;transition:.18s}
+.send:disabled{opacity:.35;cursor:not-allowed}.send:not(:disabled):hover{transform:translateY(-1px);filter:brightness(1.08)}
+.disclaimer{text-align:center;color:var(--muted);font-size:.7rem;margin:9px 0 0}
+.mobile-menu{display:none}
+.empty-history{padding:12px 9px;color:var(--muted);font-size:.82rem}
+@media(max-width:800px){.app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:10;inset:0 auto 0 0;width:min(290px,86vw);transform:translateX(-102%);transition:transform .22s ease;box-shadow:var(--shadow)}.sidebar.open{transform:translateX(0)}.mobile-menu{display:grid}.mobile-brand{display:block}.topbar{padding:0 14px}.page-label,.status{display:none}.conversation{padding:24px 15px 15px}.composer-wrap{padding:8px 12px max(14px,env(safe-area-inset-bottom))}.suggestions{grid-template-columns:1fr;max-width:440px;margin-top:24px}.welcome{padding:18px 0 0}.hint{display:none}}
+@media(max-width:420px){.brand{padding-left:2px}.topbar{height:58px}.welcome-mark{width:50px;height:50px}.welcome p{font-size:.9rem}.message{gap:9px;grid-template-columns:29px minmax(0,1fr)}.message.user{grid-template-columns:minmax(0,1fr) 29px}.msg-avatar{width:29px;height:29px}.msg-body{font-size:.92rem}.composer{border-radius:16px}.mode-select{max-width:135px}}
 </style>
-<style>
-.ai-section{max-width:1180px;margin:0 auto;padding:0 20px 48px}
-.ai-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
-.ai-card h2{margin:0 0 4px;font-size:1.45rem}
-.ai-intro{color:var(--mute);margin:0 0 14px}
-.ai-messages{display:flex;flex-direction:column;gap:12px;min-height:180px;max-height:460px;overflow-y:auto;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:10px}
-.ai-message{max-width:min(88%,720px);padding:10px 13px;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere}
-.ai-message.user{align-self:flex-end;background:var(--ink);color:var(--bg)}
-.ai-message.model{align-self:flex-start;background:var(--panel);border:1px solid var(--line);color:var(--ink)}
-.ai-form{display:flex;gap:8px;margin-top:10px}
-.ai-form textarea{min-height:48px;max-height:140px;flex:1}
-.ai-error{min-height:1.3em;color:var(--mute);font-size:.9rem;margin:8px 0 0}
-@media(max-width:560px){.ai-form{flex-direction:column}.ai-form .go{width:100%}}
-</style>
-<style>
-/* Thinkora identity + deep midnight high-contrast theme */
-:root{
- --bg:#050914;--panel:#0D1728;--ink:#F4F7FF;--mute:#B7C3D8;--line:#34435C;
- --for:#00E0A4;--against:#FF5268;--neutral:#65738B;
- color-scheme:dark;
-}
-body{
- background:radial-gradient(ellipse at 12% 0%,rgba(0,224,164,.09),transparent 34%),radial-gradient(ellipse at 92% 8%,rgba(255,82,104,.08),transparent 30%),#050914;
- color:var(--ink);
-}
-.wrap{max-width:1280px;padding-top:42px}
-.brand-kicker{margin:0 0 9px;color:#00E0A4;font-size:.76rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase}
-h1{letter-spacing:-.045em;text-shadow:0 8px 40px rgba(0,224,164,.12)}
-.sub{color:#C2CDE0;font-size:1.05rem}
-.room,.card,.ai-card{
- background:linear-gradient(145deg,rgba(22,34,54,.98),rgba(13,22,38,.98));
- border:1px solid #3A4B68;border-radius:18px;
- box-shadow:0 16px 42px rgba(0,0,0,.24);
-}
-.room{padding:18px;gap:16px}
-.panel h2{color:#F5F8FF;font-size:1rem}
-.mean,.muted,.note{color:#B7C3D8}
-.grid{gap:5px}
-.dot{background:#65738B;border:1px solid rgba(255,255,255,.13);box-shadow:inset 0 1px 2px rgba(255,255,255,.12)}
-.dot:hover{transform:scale(1.14);outline:2px solid rgba(255,255,255,.35);outline-offset:1px}
-.dot:focus-visible{outline:3px solid #fff;outline-offset:2px}
-.detail{border-color:#3A4B68;color:#D5DDF0}
-.legend{color:#D5DDF0}
-.bar{height:10px;background:linear-gradient(90deg,#FF5268 0%,#65738B 50%,#00E0A4 100%)}
-.card{padding:20px;margin-bottom:16px}
-.card h3,.ai-card h2{color:#F5F8FF;font-weight:800;letter-spacing:-.02em}
-textarea{
- color:#F5F8FF;background:#080F1D;border:1px solid #536580;border-radius:12px;
-}
-textarea::placeholder{color:#8998B1}
-textarea:focus{outline:3px solid rgba(0,224,164,.28);border-color:#00E0A4}
-.chip{color:#E7EEFA;border-color:#536580;background:#17243A}
-.chip:hover{border-color:#00E0A4;background:#193447}
-.go{background:#00E0A4;color:#04130F;border:1px solid #00E0A4;border-radius:12px;font-weight:800;box-shadow:0 6px 20px rgba(0,224,164,.16)}
-.go:hover:not(:disabled){background:#64F5C9;transform:translateY(-1px)}
-.go:focus-visible,.chip:focus-visible{outline:3px solid #fff;outline-offset:3px}
-.go:disabled{background:#526078;color:#D5DDF0;border-color:#526078}
-#status,.ai-error{color:#D5DDF0}
-table{color:#EDF2FC}
-th{color:#B7C3D8}
-th,td{border-color:#34435C;padding:8px 7px}
-.verdict{color:#00E0A4;font-size:1.7rem}
-.ai-section{max-width:1280px}
-.ai-card{padding:22px}
-.ai-intro{color:#B7C3D8}
-.ai-messages{background:#080F1D;border-color:#3A4B68;border-radius:14px}
-.ai-message.model{background:#17243A;border:1px solid #405371;color:#F4F7FF}
-.ai-message.user{background:#00E0A4;color:#04130F;font-weight:600}
-.note{border-top:1px solid #34435C;padding-top:14px}
-@media(max-width:560px){
- .wrap{padding:24px 14px 32px}
- .room{padding:12px}
- .card,.ai-card{padding:16px}
-}
-@media(prefers-reduced-motion:reduce){
- .dot,.go{transition:none}
-}
-</style>
-<style>
-/* Thinkora Studio — refreshed interface */
-:root{--bg:#070B14;--panel:#101827;--ink:#F5F8FF;--mute:#AAB8CC;--line:#26364D;--for:#00E6A8;--against:#FF6378;--neutral:#63748D;--glow:rgba(0,230,168,.14)}
-html{scroll-behavior:smooth;background:var(--bg)}
-body{min-height:100vh;background:radial-gradient(ellipse at 8% 0%,rgba(0,230,168,.13),transparent 32%),radial-gradient(ellipse at 96% 10%,rgba(255,99,120,.10),transparent 28%),linear-gradient(180deg,#070B14 0%,#0A1220 55%,#070B14 100%);color:var(--ink);font-family:Inter,"Bricolage Grotesque",system-ui,sans-serif}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to bottom,black,transparent 75%);z-index:-1}
-.topbar{max-width:1360px;margin:auto;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(116,140,173,.16)}
-.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.03em;font-size:1.1rem}
-.brand-mark{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;color:#04140F;background:linear-gradient(135deg,#6CFFD1,#00D7A0);box-shadow:0 5px 24px rgba(0,230,168,.24);font-weight:900}
-.topnav{display:flex;gap:9px;align-items:center}.topnav a{color:#B6C4D8;text-decoration:none;font-size:.86rem;padding:8px 12px;border-radius:9px}.topnav a:hover{color:white;background:#152238}
-.top-tag{font-size:.75rem;color:#8EF5D2;border:1px solid rgba(0,230,168,.28);background:rgba(0,230,168,.07);padding:6px 10px;border-radius:999px}
-.wrap{max-width:1360px;padding:52px 28px 38px}
-.brand-kicker{color:#64EBC3;font-size:.72rem;letter-spacing:.2em;margin-bottom:12px}
-h1{font-size:clamp(2.7rem,6vw,5rem);letter-spacing:-.07em;line-height:.98;margin-bottom:14px}
-.sub{font-size:1.08rem;line-height:1.7;color:#AEBBD0;max-width:690px;margin-bottom:32px}
-.layout{grid-template-columns:minmax(0,1.45fr) minmax(360px,.85fr);gap:22px}
-.room{background:linear-gradient(145deg,rgba(17,29,47,.94),rgba(10,18,31,.96));border:1px solid #2B3C55;border-radius:22px;padding:22px;gap:18px;box-shadow:0 24px 80px rgba(0,0,0,.28);backdrop-filter:blur(16px)}
-.panel h2{font-size:1rem;letter-spacing:-.02em}.mean{font-size:.8rem;color:#9EADC3}
-.grid{gap:6px}.dot{border:1px solid rgba(255,255,255,.12);box-shadow:0 2px 6px rgba(0,0,0,.2);transition:transform .16s ease,filter .16s ease}.dot:hover{filter:brightness(1.25);transform:scale(1.22)}
-.detail{border-color:#2B3C55;background:rgba(5,11,21,.52);border-radius:12px;padding:12px;color:#C7D3E5;min-height:54px}
-.legend{font-size:.82rem;color:#B6C4D8;margin:14px 4px}.bar{height:9px}
-.card,.ai-card{background:linear-gradient(145deg,rgba(17,29,47,.96),rgba(11,19,32,.98));border:1px solid #2B3C55;border-radius:20px;box-shadow:0 18px 55px rgba(0,0,0,.22);padding:22px;margin-bottom:16px}
-.card h3,.ai-card h2{font-size:1.05rem;letter-spacing:-.025em;margin-bottom:13px}
-#q{min-height:116px;padding:15px;font-size:.98rem;line-height:1.55;background:#080F1C;border-color:#344761}
-#q::placeholder,#aiInput::placeholder{color:#7587A2}
-.chips{gap:8px;margin:12px 0 16px}.chip{font-size:.78rem;padding:7px 11px;border-radius:999px;background:#15243A;border-color:#344761;color:#C9D6E8}.chip:hover{background:#1C344B;border-color:#00DFA6}
-.go{min-height:46px;padding:11px 18px;border-radius:12px;background:linear-gradient(135deg,#6BFFD1,#00DCA4);color:#04150F;font-size:.91rem;letter-spacing:-.01em;box-shadow:0 8px 26px rgba(0,220,164,.18);transition:transform .18s ease,box-shadow .18s ease}
-.go:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,220,164,.26)}
-#status,.ai-error{font-size:.82rem;color:#B7C7DC}
-table{font-size:.82rem}th,td{padding:9px 7px;border-color:#293A52}th{color:#9DAEC5}
-.verdict{font-size:1.5rem;letter-spacing:-.04em;color:#6CFFD1}
-.muted,.note{color:#A7B6CB}.note{max-width:none;margin-top:24px;padding-top:18px;border-top:1px solid #26364D;font-size:.8rem;line-height:1.7}
-.ai-section{max-width:1360px;padding:0 28px 56px}
-.ai-card{padding:26px}.ai-card h2{font-size:1.55rem;margin-bottom:6px}.ai-intro{color:#AAB9CF}
-.ai-messages{min-height:240px;max-height:520px;padding:16px;background:#080F1C;border:1px solid #2B3C55;border-radius:16px}
-.ai-message{padding:13px 16px;border-radius:15px;line-height:1.65;font-size:.93rem}
-.ai-message.user{background:linear-gradient(135deg,#6BFFD1,#00DCA4);color:#04150F;border:0}
-.ai-message.model{background:#142239;border:1px solid #2D405B;color:#F2F6FD}
-#aiInput{min-height:56px;background:#080F1C;border-color:#344761;padding:14px}
-.ai-form{gap:10px}.ai-form .go{min-width:110px}
-@media(max-width:900px){.layout{grid-template-columns:1fr}.topbar{padding:14px 18px}.wrap{padding:38px 18px 30px}.ai-section{padding:0 18px 38px}}
-@media(max-width:560px){.topnav a{padding:7px 8px;font-size:.76rem}.top-tag{display:none}.wrap{padding:32px 14px 26px}h1{font-size:3.25rem}.sub{font-size:.96rem;margin-bottom:24px}.room{padding:14px;gap:14px}.card,.ai-card{padding:17px;border-radius:16px}.ai-section{padding:0 14px 30px}.ai-card h2{font-size:1.3rem}.ai-messages{min-height:200px;padding:11px}.ai-form{flex-direction:row}.ai-form .go{width:auto;min-width:82px}}
-@media(max-width:380px){.ai-form{flex-direction:column}.ai-form .go{width:100%}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.dot,.go{transition:none}}
-</style>
-<style>
-/* Thinkora neon studio layout inspired by the approved concept */
-:root{--bg:#030817;--panel:#08152b;--panel2:#0d1d38;--ink:#f7f9ff;--mute:#b6c5df;--line:#263d68;--for:#00f0bd;--against:#ff8a27;--neutral:#354b70;--violet:#9c5cff;--cyan:#00cfff;color-scheme:dark}
-html,body{background:#030817;color:var(--ink)}
-body{min-height:100vh;background:radial-gradient(ellipse at 0% 5%,rgba(0,207,255,.13),transparent 28%),radial-gradient(ellipse at 100% 0%,rgba(156,92,255,.18),transparent 30%),linear-gradient(145deg,#030817,#07132a 60%,#08051c);font-family:Inter,"Bricolage Grotesque",system-ui,sans-serif}
-body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(#000,transparent 85%)}
-.topbar{height:82px;max-width:1600px;margin:auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(82,121,190,.25);background:rgba(3,8,23,.72);backdrop-filter:blur(18px)}
-.brand{display:flex;align-items:center;gap:12px;font-size:1.3rem;font-weight:900;letter-spacing:-.05em;color:#fff}
-.brand-mark{width:43px;height:43px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(140deg,#00eaff,#00e0a4);color:#031323;font-size:1.5rem;box-shadow:0 0 28px rgba(0,220,255,.32)}
-.topnav{display:flex;gap:10px;align-items:center}.topnav a{padding:10px 18px;border:1px solid #293c66;border-radius:999px;color:#d8e5ff;text-decoration:none;font-size:.9rem;background:rgba(10,25,51,.65)}.topnav a:first-child,.topnav a:hover{border-color:#00e6cf;color:#00ffe0;box-shadow:0 0 18px rgba(0,230,207,.15)}
-.top-tag{padding:8px 14px;border-radius:999px;color:#8fffe0;background:rgba(0,240,189,.08);border:1px solid rgba(0,240,189,.3);font-size:.78rem}
-.wrap{max-width:1600px;margin:auto;padding:26px 26px 18px}
-.app-grid{display:grid;grid-template-columns:210px minmax(450px,1fr) minmax(310px,390px);gap:18px;align-items:start}
-.side-nav{position:sticky;top:18px;border:1px solid #263d68;border-radius:20px;padding:15px;background:linear-gradient(160deg,rgba(13,30,60,.97),rgba(5,14,32,.97));box-shadow:0 15px 45px #0007}
-.side-nav .welcome{padding:16px 13px;margin-bottom:12px;border:1px solid #8c45ff;border-radius:15px;background:linear-gradient(120deg,rgba(128,54,255,.22),rgba(0,207,255,.07));color:#e9dcff;font-weight:700}
-.side-nav a{display:flex;align-items:center;gap:12px;padding:13px 12px;border-radius:12px;color:#d6e4ff;text-decoration:none;margin:3px 0;font-size:.92rem}.side-nav a:hover,.side-nav a.active{background:rgba(0,215,255,.1);color:#4defff;outline:1px solid rgba(0,215,255,.24)}
-.side-nav .create{background:linear-gradient(100deg,#00f0bd,#00cfff);color:#031323;font-weight:900;justify-content:center;margin:12px 0;box-shadow:0 8px 28px rgba(0,220,200,.2)}
-.side-nav .tip{margin-top:15px;padding:14px;border:1px solid #6c49dc;border-radius:15px;color:#f4d36d;background:linear-gradient(135deg,rgba(112,54,255,.16),rgba(0,200,255,.06));font-weight:700}
-.app-main{min-width:0}.hero{position:relative;overflow:hidden;border:1px solid #225a9b;border-radius:22px;padding:30px 26px 26px;margin-bottom:15px;min-height:218px;background:radial-gradient(ellipse at 15% 60%,rgba(0,109,255,.5),transparent 36%),radial-gradient(ellipse at 88% 50%,rgba(255,128,0,.34),transparent 38%),linear-gradient(110deg,#06102c,#10143a 52%,#20102b);box-shadow:0 14px 50px #0008}
-.hero:before,.hero:after{content:"";position:absolute;width:380px;height:100px;border:3px solid rgba(0,205,255,.5);border-color:rgba(0,205,255,.6) transparent transparent transparent;border-radius:50%;filter:blur(2px);transform:rotate(-12deg);left:-55px;top:30px}.hero:after{left:auto;right:-65px;top:35px;border-color:rgba(255,145,25,.7) transparent transparent transparent;transform:rotate(15deg)}
-.hero .eyebrow{color:#7feeff;text-transform:uppercase;letter-spacing:.22em;font-size:.72rem;font-weight:900;position:relative;z-index:1}.hero h1{font-size:clamp(2.1rem,4vw,3.6rem);line-height:1.02;margin:14px 0 10px;letter-spacing:-.065em;position:relative;z-index:1}.hero h1 span:nth-child(1){color:#fff}.hero h1 span:nth-child(2){color:#00f0bd}.hero h1 span:nth-child(3){color:#ff9a37}.hero p{position:relative;z-index:1;color:#d7e6ff;margin:0;font-size:1rem}
-.brand-kicker{display:none}.wrap>h1,.wrap>.sub{display:none}
-.card,.ai-card,.room{background:linear-gradient(145deg,rgba(9,25,51,.97),rgba(5,15,34,.98));border:1px solid #294978;border-radius:18px;box-shadow:0 16px 42px rgba(0,0,0,.34)}
-.card{padding:18px;margin-bottom:14px}.card h3,.ai-card h2{color:#f8fbff;font-size:1.05rem;font-weight:850;letter-spacing:-.025em}
-#q{min-height:65px;background:#0b1833;border:1px solid #45618f;border-radius:14px;color:#fff;padding:14px}
-#q:focus,#aiInput:focus{outline:3px solid rgba(0,230,255,.22);border-color:#00dfff}
-.chip{background:#101f3d;border:1px solid #39527e;color:#dce9ff}.chip:hover{border-color:#00e8c1;background:#123b4a}
-.go{background:linear-gradient(100deg,#00f0bd,#00cfff);color:#031323;border:0;border-radius:13px;font-weight:900;box-shadow:0 8px 25px rgba(0,230,200,.2)}
-.go:hover:not(:disabled){filter:brightness(1.13);transform:translateY(-2px)}
-.layout{display:contents}.layout>section{min-width:0}.layout>aside{min-width:0}
-.room{padding:17px;gap:13px;grid-template-columns:repeat(3,minmax(0,1fr));border-color:#2d5990}
-.panel h2{color:#f4f8ff}.mean{color:#a8c3e9}
-.grid{grid-template-columns:repeat(10,minmax(0,1fr));gap:6px}
-.dot{width:100%;aspect-ratio:1;border-radius:7px;background:#354b70;border:1px solid rgba(255,255,255,.25);box-shadow:0 2px 7px #0008;transition:transform .16s,filter .16s}
-.dot:hover{transform:scale(1.2);filter:brightness(1.35);z-index:2}.dot:focus-visible{outline:3px solid #fff;outline-offset:2px}
-.detail{background:#07142b;border:1px solid #294978;border-radius:12px;color:#d5e5ff;padding:12px}.legend{color:#d9e7ff}.bar{height:11px;background:linear-gradient(90deg,#ff8a27,#536487 50%,#00f0bd)}
-.app-right{min-width:0;position:sticky;top:14px}.ai-section{padding:0;margin:0;max-width:none}.ai-card{padding:18px;min-height:650px}.ai-card h2{font-size:1.15rem}.ai-intro{color:#b8c9e4;font-size:.86rem}.ai-messages{min-height:330px;max-height:470px;background:#050e22;border:1px solid #2a4674;border-radius:15px;padding:12px}.ai-message.model{background:#14264b;border:1px solid #3a5790;color:#f4f8ff}.ai-message.user{background:linear-gradient(100deg,#00f0bd,#00cfff);color:#031323}
-#aiInput{background:#07142b;border:1px solid #3c5783;color:#fff}.ai-form{align-items:stretch}.ai-form .go{min-width:82px}
-#status,.ai-error{color:#a9c4e8}.note{color:#8ea8cd;border-color:#263d68}
-.results-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}.results-grid .card{margin:0}
-.app-main .layout>aside{display:contents}
-@media(max-width:1150px){.app-grid{grid-template-columns:175px minmax(0,1fr)}.app-right{grid-column:2;position:static}.ai-card{min-height:0}.ai-messages{min-height:220px}}
-@media(max-width:760px){.topbar{height:auto;padding:12px 15px}.topnav{gap:4px}.topnav a{padding:8px 10px;font-size:.78rem}.top-tag{display:none}.wrap{padding:14px 12px}.app-grid{grid-template-columns:1fr}.side-nav{position:static;display:flex;gap:6px;overflow-x:auto;padding:8px}.side-nav .welcome,.side-nav .tip{display:none}.side-nav a{white-space:nowrap;padding:10px}.side-nav .create{margin:0;min-width:130px}.app-right{grid-column:auto}.hero{min-height:180px;padding:24px 18px}.hero h1{font-size:2.35rem}.room{grid-template-columns:1fr}.grid{grid-template-columns:repeat(10,minmax(0,1fr))}.results-grid{grid-template-columns:1fr}.ai-card{min-height:0}.ai-messages{min-height:210px}}
-@media(max-width:430px){.brand{font-size:1.05rem}.brand-mark{width:36px;height:36px}.topnav a:nth-child(2){display:none}.hero h1{font-size:2rem}.dot{border-radius:5px}}
-@media(prefers-reduced-motion:reduce){.dot,.go{transition:none}}
-</style></head>
-<body>\n<header class="topbar"><div class="brand"><span class="brand-mark">✦</span><span>THINKORA</span></div><nav class="topnav" aria-label="Main navigation"><a href="#room">⌂ Debate Room</a><a href="#ai-title">✧ AI Assistant</a><a href="#tally">▥ Results</a></nav><span class="top-tag">● THINK · DEBATE · DECIDE</span></header>
-<div class="wrap">
-<p class="brand-kicker">THINK DEEPER · BUILD SMARTER</p>
-<h1>Ideas deserve<br>better debates<span style="color:#00E6A8">.</span></h1>
-<p class="sub">Bring a question. Explore 300 simulated perspectives, challenge assumptions, and use AI to reach a clearer, more balanced point of view.</p>
-<div class="layout">
-<section>
-<div class="room" id="room"></div>
-<div class="legend"><span>Against</span><span class="bar"></span><span>For</span></div>
-</section>
-<aside>
-<div class="card">
-<h3>Your question</h3>
-<textarea id="q" placeholder="Should I start a YouTube channel full-time?"></textarea>
-<div class="chips" id="chips"></div>
-<button class="go" id="go">Start the debate</button>
-<p id="status" aria-live="polite"></p>
-</div>
-<div class="card"><h3>Room average by round</h3>
-<table><thead><tr><th>Round</th><th>People</th><th>CEOs</th><th>Bots</th><th>Room</th></tr></thead><tbody id="tally"><tr><td colspan="5" class="muted">Nothing yet.</td></tr></tbody></table></div>
-<div class="card" id="final"><h3>Final answer</h3><p class="muted">The answer appears after round 3.</p></div>
-<div class="card" id="Thinkora AIDebate"><h3>Thinkora AI debate</h3><p class="muted">Thinkora AI will analyse the topic across three rounds.</p></div>\n<div class="card" id="definition"><h3>Topic definition</h3><p class="muted">A clear definition of your debate topic will appear here after the debate.</p></div>
-<div class="card" id="trace"><h3>How the room reasoned</h3><p class="muted">Sub-questions and the biggest changes of mind appear here.</p></div>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+ <div class="brand"><div class="logo">✦</div><span>Thinkora</span></div>
+ <button class="new-chat" id="newChat"><span>＋</span> New chat</button>
+ <div class="nav-label">Your conversations</div>
+ <input class="search" id="searchHistory" type="search" placeholder="⌕  Search chats" aria-label="Search conversations">
+ <div class="history" id="history"><div class="empty-history">Your recent chats will appear here.</div></div>
+ <div class="sidebar-bottom">
+  <button class="side-action" id="themeToggle"><span>◐</span> <span>Switch appearance</span></button>
+  <button class="side-action" id="clearHistory"><span>⌫</span> <span>Clear chat history</span></button>
+ </div>
+ <div class="profile"><div class="avatar">T</div><div><strong style="color:var(--ink)">Thinkora AI</strong><br><span>Personal AI assistant</span></div></div>
 </aside>
+<main class="main">
+ <header class="topbar">
+  <div class="top-left"><button class="icon-btn mobile-menu" id="menuToggle" aria-label="Open menu">☰</button><span class="mobile-brand">Thinkora</span><span class="page-label" id="pageLabel">New conversation</span></div>
+  <div style="display:flex;align-items:center;gap:12px"><span class="status"><i class="status-dot"></i> AI service</span><button class="icon-btn" id="topTheme" aria-label="Toggle theme" title="Toggle theme">◐</button></div>
+ </header>
+ <section class="conversation" id="conversation">
+  <div class="content" id="content">
+   <div class="welcome" id="welcome">
+    <div class="welcome-mark">✦</div>
+    <h1>What would you like<br>to explore today?</h1>
+    <p>Ask anything. Think clearly. Create something great.</p>
+    <div class="suggestions">
+     <button class="suggestion" data-prompt="Explain a difficult topic in simple words."><strong>Learn something</strong>Break down a topic step by step</button>
+     <button class="suggestion" data-prompt="Help me brainstorm a practical business idea with low starting cost."><strong>Explore ideas</strong>Find and shape a new idea</button>
+     <button class="suggestion" data-prompt="Help me write a compelling short video script."><strong>Create content</strong>Write a script, story, or prompt</button>
+     <button class="suggestion" data-prompt="Compare the pros and cons of two options and recommend one."><strong>Make a decision</strong>Compare options and trade-offs</button>
+    </div>
+   </div>
+   <div class="messages" id="messages"></div>
+  </div>
+ </section>
+ <div class="composer-wrap">
+  <div class="composer-area">
+   <form class="composer" id="chatForm">
+    <textarea id="prompt" rows="1" maxlength="5000" placeholder="Message Thinkora..." aria-label="Message Thinkora"></textarea>
+    <div class="composer-bottom">
+     <div class="composer-tools"><select class="mode-select" id="mode" aria-label="Conversation mode"><option value="chat">✦ Ask Thinkora</option><option value="debate">⚖ Debate a topic</option></select><span class="hint">Enter to send · Shift + Enter for a new line</span></div>
+     <button class="send" id="send" type="submit" aria-label="Send message" disabled>↑</button>
+    </div>
+   </form>
+   <p class="disclaimer">Thinkora can make mistakes. Check important information.</p>
+  </div>
+ </div>
+</main>
 </div>
-<p class="note">The 300 voices show a simulated crowd response. Thinkora AI separately analyses the topic in three real AI-powered debate rounds, challenges arguments, and provides a final balanced assessment.</p>
-</div>
-<script>
-const $=s=>document.querySelector(s);
-const PN=[['people','100 common people'],['ceos','100 CEOs'],['bots','100 specialist bots']];
-const JOBS=['farmer','bus driver','teacher','shopkeeper','nurse','student','engineer','retired clerk','tailor','gig worker'];
-const MIND=['skeptical','hopeful','cautious','impulsive','family-first','money-first','community-first','tech-curious','traditional','idealist'];
-const CEO=['frugal operator','aggressive scaler','product-obsessed','risk-averse','brand builder','data-driven','contrarian investor','people-first founder','cost cutter','long-term compounder'];
-const BOT=['critic','data analyst','legal and risk','financial modeler','devil’s advocate','ethicist','engineer','market researcher','psychologist','historian'];
-const BOTOPT=[.2,.5,.3,.45,.1,.4,.6,.55,.5,.4];
-const WHY=[
-['This feels too risky for ordinary families.','I’m not convinced. I want proof first.','It could work if it stays affordable.','It sounds worth trying to me.','This would really help people like us.'],
-['The downside is larger than the upside.','Margins don’t support it yet.','Worth a small, measured bet.','The upside justifies moving now.','Move fast. Waiting costs more than failing.'],
-['Evidence is thin and the risks are unpriced.','Key assumptions are untested.','Net benefit is plausible but uncertain.','Expected value is positive in most scenarios.','Benefits dominate across the scenarios I checked.']];
-const SUBQ=['Who is affected, and how?','What does it cost, and what is the worst case?','Is it feasible with the money and people available?','What would change our minds?'];
-const CHIPS=['Should I start a YouTube channel full-time?','Should a city ban cars from its centre?','Should a small shop move fully online?'];
-function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
-const clamp=v=>Math.max(-2,Math.min(2,v)),fmt=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(2),pick=(r,a)=>a[Math.floor(r()*a.length)];
-function build(){const r=rng(7),a=[];
-for(let i=0;i<100;i++)a.push({id:'P'+(i+1),p:0,role:pick(r,JOBS)+', '+pick(r,MIND),opt:r(),risk:r(),st:r()});
-for(let i=0;i<100;i++)a.push({id:'C'+(i+1),p:1,role:pick(r,CEO),opt:.4+r()*.6,risk:.3+r()*.7,st:r()});
-for(let i=0;i<100;i++){const k=Math.floor(r()*10);a.push({id:'B'+(i+1),p:2,role:BOT[k],opt:BOTOPT[k]+(r()-.5)*.3,risk:r(),st:.2+r()*.5})}
-return a}
-const first=(a,q)=>{const qb=(hash(q)%200)/100-1,n=(hash(q+a.id)%100)/100-.5;return clamp(1.2*qb+(a.opt-.5)*1.5+(a.risk-.5)*qb+n)};
-const why=a=>WHY[a.p][Math.max(0,Math.min(4,Math.round((a.s+2)))) ];
-const mean=l=>l.reduce((t,a)=>t+a.s,0)/l.length;
-let A=build(),dots=[];
-const room=$('#room');
-PN.forEach((p,i)=>{const d=document.createElement('div');d.className='panel';d.innerHTML='<h2>'+p[1]+'</h2><p class="mean" id="m'+i+'"></p><div class="grid"></div>';room.appendChild(d);
-A.filter(a=>a.p==i).forEach(a=>{const b=document.createElement('button');b.className='dot';b.setAttribute('aria-label',a.id+', '+a.role);b.onclick=()=>show(a);d.querySelector('.grid').appendChild(b);dots.push(b)})});
-const det=document.createElement('div');det.className='detail';det.textContent='Select a dot to read that voice’s view.';room.appendChild(det);
-function show(a){det.textContent=a.s===undefined?a.id+' · '+a.role:a.id+' · '+a.role+' · stance '+fmt(a.s)+' · “'+why(a)+'”'}
-function paint(){A.forEach((a,i)=>{const s=a.s,v=s>=0?'--for':'--against';dots[i].style.background='color-mix(in srgb,var('+v+') '+Math.min(100,Math.abs(s)/1.5*100)+'%,var(--neutral))'});
-for(let i=0;i<3;i++)$('#m'+i).textContent='Average '+fmt(mean(A.filter(a=>a.p==i)))}
-CHIPS.forEach(t=>{const b=document.createElement('button');b.className='chip';b.textContent=t;b.onclick=()=>{$('#q').value=t};$('#chips').appendChild(b)});
-const wait=ms=>new Promise(r=>setTimeout(r,ms));
-async function readApiJson(response){
- const raw=await response.text();
- let data;
- try{data=JSON.parse(raw);}
- catch(error){
-  const preview=raw.replace(/<[^>]*>/g," ").replace(/\\s+/g," ").trim().slice(0,180);
-  throw new Error("Thinkora server returned an invalid response (HTTP "+response.status+"). "+(preview||"The server response was empty.")+" Check the Vercel function logs if this continues.");
- }
- if(!response.ok)throw new Error(data.error||("Request failed (HTTP "+response.status+")."));
- return data;
-}
-async function askThinkora AIDebate(topic,round,previous){
- const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),55000);
- try{
-  const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({task:'debate',topic,round,previous})});
-  const data=await readApiJson(response);
-  return data.reply;
- }finally{clearTimeout(timeout)}
-}
-function addThinkora AIRound(round,reply){
- const section=document.createElement('section');section.style.marginTop='12px';
- const heading=document.createElement('h4');heading.textContent='Round '+round+(round===1?' · Independent analysis':round===2?' · Challenge and rebuttal':' · Final judgment');
- const body=document.createElement('p');body.style.whiteSpace='pre-wrap';body.textContent=reply;
- section.append(heading,body);$('#Thinkora AIDebate').appendChild(section);
-}
-async function run(){
-const q=$('#q').value.trim();if(!q){$('#status').textContent='Type a question first.';return}
-$('#go').disabled=true;A=build();$('#tally').innerHTML='';$('#Thinkora AIDebate').innerHTML='<h3>Thinkora AI debate</h3><p class="muted">Thinkora AI is analysing the topic across three rounds...</p>';let Thinkora AIRounds=[];
-const names=['independent opinions','hearing the room','final positions'];
-for(let rd=1;rd<=3;rd++){
-$('#status').textContent='Round '+rd+' of 3: '+names[rd-1];
-const m=rd>1?mean(A):0;
-A.forEach(a=>{if(rd==1){a.s=first(a,q);a.s1=a.s}else a.s=clamp(a.s+(1-a.st)*.5*(m-a.s))});
-paint();
-const pm=[0,1,2].map(i=>mean(A.filter(a=>a.p==i)));
-$('#tally').insertAdjacentHTML('beforeend','<tr><td>'+rd+'</td>'+pm.map(v=>'<td>'+fmt(v)+'</td>').join('')+'<td><b>'+fmt(mean(A))+'</b></td></tr>');
-await wait(350);
-}
-$('#status').textContent='The crowd rounds are complete. Thinkora AI is preparing its full three-round analysis...';
-try{
- const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),50000);
- let response,data;
- try{response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({task:'debate',topic:q})});data=await readApiJson(response);}
- finally{clearTimeout(timeout);}
- if(!response.ok)throw new Error(data.error||'Thinkora AI could not complete the debate.');
- const reply=String(data.reply||'').trim();if(!reply)throw new Error('Thinkora AI returned an empty response.');
- Thinkora AIRounds=[reply];
- $('#Thinkora AIDebate').innerHTML='<h3>Thinkora AI debate</h3>';
- const sections=[
- ['ROUND 1 — INDEPENDENT ANALYSIS','Round 1 · Independent analysis'],
- ['ROUND 2 — CHALLENGE AND REBUTTAL','Round 2 · Challenge and rebuttal'],
- ['ROUND 3 — FINAL JUDGMENT','Round 3 · Final judgment']
- ];
- const findHeading=(text,heading)=>text.toUpperCase().indexOf(heading);
- const positions=sections.map(s=>findHeading(reply,s[0]));
- sections.forEach((s,i)=>{
-  const start=positions[i];if(start<0)return;
-  let end=reply.length;for(let j=i+1;j<positions.length;j++)if(positions[j]>start){end=positions[j];break;}
-  const part=reply.slice(start+s[0].length,end).trim();
-  const section=document.createElement('section');section.style.marginTop='12px';
-  const h=document.createElement('h4');h.textContent=s[1];
-  const p=document.createElement('p');p.style.whiteSpace='pre-wrap';p.textContent=part;
-  section.append(h,p);$('#Thinkora AIDebate').appendChild(section);
- });
- const defStart=findHeading(reply,'TOPIC DEFINITION');
- const definition=$('#definition');
- if(defStart>=0){definition.innerHTML='<h3>Topic definition</h3><p></p>';definition.querySelector('p').style.whiteSpace='pre-wrap';definition.querySelector('p').textContent=reply.slice(defStart+'TOPIC DEFINITION'.length).trim();}
- else {definition.innerHTML='<h3>Topic definition</h3><p class="muted">Thinkora AI did not include a separate definition. See its full analysis above.</p>';}
- const finalStart=findHeading(reply,'ROUND 3 — FINAL JUDGMENT');
- if(finalStart>=0){const finalText=reply.slice(finalStart+'ROUND 3 — FINAL JUDGMENT'.length,defStart>finalStart?defStart:reply.length).trim();const h=document.createElement('h3');h.style.marginTop='14px';h.textContent='Thinkora AI conclusion';const p=document.createElement('p');p.style.whiteSpace='pre-wrap';p.textContent=finalText;$('#final').append(h,p);}
-}catch(error){
- const note=document.createElement('p');note.className='muted';note.textContent='Thinkora AI could not load: '+(error.name==='AbortError'?'request timed out':error.message);
- $('#Thinkora AIDebate').appendChild(note);
- $('#definition').innerHTML='<h3>Topic definition</h3><p class="muted">'+(error.message||'Thinkora AI is unavailable. Please try again later.')+'</p>';
-}
-const pm=[0,1,2].map(i=>mean(A.filter(a=>a.p==i))),o=(pm[0]+pm[1]+pm[2])/3;
-const f=A.filter(a=>a.s>.25).length/3,ag=A.filter(a=>a.s<-.25).length/3,u=100-Math.round(f)-Math.round(ag);
-const sd=Math.sqrt(A.reduce((t,a)=>t+(a.s-mean(A))**2,0)/300),conf=Math.round(Math.max(0,1-sd/1.6)*100);
-const v=o>.35?'Go ahead':o<-.35?'Don’t go ahead':'Conditional: the room is split';
-const dis=[...A].sort((x,y)=>o>=0?x.s-y.s:y.s-x.s)[0];
-$('#final').innerHTML='<h3>Final answer</h3><p class="verdict">'+v+'</p><p>'+Math.round(f)+'% lean for, '+Math.round(ag)+'% lean against, '+u+'% undecided. Room score '+fmt(o)+' on a −2 to +2 scale. Confidence '+conf+'%.</p><p class="muted"><b>Strongest dissent:</b> '+dis.id+' ('+dis.role+'): “'+why(dis)+'”</p>';
-const mv=[...A].sort((x,y)=>Math.abs(y.s-y.s1)-Math.abs(x.s-x.s1)).slice(0,5);
-$('#trace').innerHTML='<h3>How the room reasoned</h3><p class="muted">Sub-questions every voice weighed:</p><ul>'+SUBQ.map(s=>'<li>'+s+'</li>').join('')+'</ul><p class="muted" style="margin-top:10px">Biggest changes of mind:</p><ul>'+mv.map(a=>'<li>'+a.id+' ('+a.role+') moved '+fmt(a.s1)+' to '+fmt(a.s)+' after hearing the room.</li>').join('')+'</ul>';
-$('#status').textContent='Debate complete.';$('#go').disabled=false}
-$('#go').onclick=run;
-</script>
-<section class="ai-section" aria-labelledby="ai-title" id="assistant">
-<div class="ai-card">
-<h2 id="ai-title">Ask Thinkora AI anything</h2>
-<p class="ai-intro">Your Thinkora AI assistant is ready. Ask follow-up questions and explore ideas with the context of your debate.</p>
-<div class="ai-messages" id="aiMessages" aria-live="polite">
-<div class="ai-message model">Welcome to Thinkora AI. Ask me a question, explore an idea, or get a clear explanation.</div>
-</div>
-<form class="ai-form" id="aiForm">
-<textarea id="aiInput" maxlength="6000" rows="2" placeholder="Type your question..." aria-label="Your message" required></textarea>
-<button class="go" id="aiSend" type="submit">Send</button>
-</form>
-<p class="ai-error" id="aiStatus" role="status"></p>
-</div>
-</section>
 <script>
 (()=>{
-const form=document.getElementById("aiForm");
-const input=document.getElementById("aiInput");
-const messagesEl=document.getElementById("aiMessages");
-const status=document.getElementById("aiStatus");
-const send=document.getElementById("aiSend");
-const history=[];
-function addMessage(role,text){
- const el=document.createElement("div");
- el.className="ai-message "+(role==="user"?"user":"model");
- el.textContent=text;
- messagesEl.appendChild(el);
- messagesEl.scrollTop=messagesEl.scrollHeight;
-}
-form.addEventListener("submit",async(event)=>{
- event.preventDefault();
- const text=input.value.trim();
- if(!text||send.disabled)return;
- history.push({role:"user",text});
- addMessage("user",text);
- input.value="";
- send.disabled=true;
- status.textContent="Thinkora AI is thinking...";
- try{
-  const response=await fetch("/api/chat",{
-   method:"POST",
-   headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({messages:history})
-  });
-  const data=await readApiJson(response);
-  if(!response.ok)throw new Error(data.error||"Could not get a reply.");
-  const reply=String(data.reply||"").trim();
-  if(!reply)throw new Error("Thinkora AI returned an empty reply.");
-  history.push({role:"model",text:reply});
-  addMessage("model",reply);
-  status.textContent="";
- }catch(error){
-  history.pop();
-  status.textContent=error.message||"Something went wrong. Please try again.";
- }finally{
-  send.disabled=false;
-  input.focus();
- }
-});
+const $=id=>document.getElementById(id);
+const form=$('chatForm'),input=$('prompt'),send=$('send'),messagesEl=$('messages'),welcome=$('welcome'),historyEl=$('history'),search=$('searchHistory'),sidebar=$('sidebar'),conversation=$('conversation'),pageLabel=$('pageLabel'),mode=$('mode');
+const STORAGE='thinkora-conversations-v1',THEME='thinkora-theme-v1';
+let chats=[],activeId=null,busy=false;
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function load(){try{const v=JSON.parse(localStorage.getItem(STORAGE)||'[]');chats=Array.isArray(v)?v:[]}catch{chats=[]}}
+function save(){try{localStorage.setItem(STORAGE,JSON.stringify(chats.slice(0,60)))}catch{}}
+function active(){return chats.find(c=>c.id===activeId)}
+function makeChat(){const c={id:uid(),title:'New conversation',messages:[],updated:Date.now()};chats.unshift(c);activeId=c.id;save();renderHistory();renderChat();input.focus();sidebar.classList.remove('open')}
+function titleFrom(text){const t=text.trim().replace(/\s+/g,' ');return t.length>34?t.slice(0,34)+'…':t||'New conversation'}
+function renderHistory(){const term=search.value.trim().toLowerCase();historyEl.replaceChildren();const list=chats.filter(c=>c.title.toLowerCase().includes(term));if(!list.length){const e=document.createElement('div');e.className='empty-history';e.textContent=chats.length?'No matching chats.':'Your recent chats will appear here.';historyEl.append(e);return}list.forEach(c=>{const b=document.createElement('button');b.className='history-item'+(c.id===activeId?' active':'');b.type='button';const ico=document.createElement('span');ico.textContent='◌';const label=document.createElement('span');label.textContent=c.title;b.append(ico,label);b.title=c.title;b.onclick=()=>{activeId=c.id;renderHistory();renderChat();sidebar.classList.remove('open')};historyEl.append(b)})}
+function addMessage(role,text,actions=true){const row=document.createElement('article');row.className='message '+(role==='user'?'user':'assistant');const avatar=document.createElement('div');avatar.className='msg-avatar';avatar.textContent=role==='user'?'Y':'✦';const body=document.createElement('div');body.className='msg-body';body.textContent=text;row.append(avatar,body);if(role!=='user'&&actions){const tools=document.createElement('div');tools.className='message-actions';const copy=document.createElement('button');copy.type='button';copy.textContent='Copy';copy.onclick=()=>{if(navigator.clipboard?.writeText)navigator.clipboard.writeText(text).then(()=>{copy.textContent='Copied';setTimeout(()=>copy.textContent='Copy',1200)}).catch(()=>{});};tools.append(copy);row.append(tools)}messagesEl.append(row);return row}
+function renderChat(){messagesEl.replaceChildren();const c=active();welcome.hidden=!!(c&&c.messages.length);if(c){c.messages.forEach(m=>addMessage(m.role,m.text,m.role!=='user'));pageLabel.textContent=c.title}else pageLabel.textContent='New conversation';conversation.scrollTop=conversation.scrollHeight}
+function setBusy(v){busy=v;send.disabled=v||!input.value.trim();input.disabled=v;mode.disabled=v}
+function showTyping(){const row=document.createElement('article');row.className='message assistant';row.id='typing';const a=document.createElement('div');a.className='msg-avatar';a.textContent='✦';const b=document.createElement('div');b.className='msg-body';b.innerHTML='<span class="typing"><i></i><i></i><i></i></span>';row.append(a,b);messagesEl.append(row);conversation.scrollTop=conversation.scrollHeight}
+function readResponse(response){return response.text().then(raw=>{let data;try{data=JSON.parse(raw)}catch{throw new Error('The server returned an unreadable response. Please try again.')}if(!response.ok)throw new Error(data.error||'Request failed (HTTP '+response.status+').');return data})}
+async function submit(text){const prompt=text.trim();if(!prompt||busy)return;if(!active())makeChat();const c=active();if(!c)return;c.messages.push({role:'user',text:prompt});if(c.messages.length===1)c.title=titleFrom(prompt);c.updated=Date.now();save();renderHistory();welcome.hidden=true;addMessage('user',prompt,false);input.value='';input.style.height='auto';setBusy(true);showTyping();conversation.scrollTop=conversation.scrollHeight;
+try{const task=mode.value==='debate'?'debate':'chat';const payload=task==='debate'?{task:'debate',topic:prompt}:{task:'chat',messages:c.messages.slice(-12)};const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await readResponse(response);const reply=String(data.reply||'').trim();if(!reply)throw new Error('Thinkora returned an empty reply.');$('typing')?.remove();c.messages.push({role:'model',text:reply});c.updated=Date.now();save();addMessage('model',reply);pageLabel.textContent=c.title;renderHistory()}
+catch(error){$('typing')?.remove();const msg=error.message||'Something went wrong. Please try again.';addMessage('model','I could not complete that request: '+msg);c.messages.pop();save()}
+finally{setBusy(false);input.focus();conversation.scrollTop=conversation.scrollHeight}}
+form.addEventListener('submit',e=>{e.preventDefault();submit(input.value)});
+input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,180)+'px';send.disabled=busy||!input.value.trim()});
+input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
+document.querySelectorAll('.suggestion').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.prompt;input.dispatchEvent(new Event('input'));input.focus()}));
+$('newChat').onclick=makeChat;
+search.addEventListener('input',renderHistory);
+function toggleTheme(){const next=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=next;try{localStorage.setItem(THEME,next)}catch{}}
+$('themeToggle').onclick=toggleTheme;$('topTheme').onclick=toggleTheme;
+try{const saved=localStorage.getItem(THEME);if(saved)document.documentElement.dataset.theme=saved;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light'}catch{}
+$('menuToggle').onclick=()=>sidebar.classList.toggle('open');
+$('clearHistory').onclick=()=>{if(!chats.length)return;if(confirm('Clear all saved Thinkora conversations on this device?')){chats=[];activeId=null;save();renderHistory();renderChat()}};
+load();renderHistory();renderChat();
 })();
 </script>
-<script>
-(()=>{
-const wrap=document.querySelector('.wrap'),layout=document.querySelector('.layout'),left=layout.querySelector(':scope > section'),right=layout.querySelector(':scope > aside'),ai=document.querySelector('.ai-section');
-const shell=document.createElement('div');shell.className='app-grid';
-const side=document.createElement('nav');side.className='side-nav';side.innerHTML='<div class="welcome">✦ Welcome to Thinkora<br><small>Ready for a smarter debate?</small></div><a class="create" href="#q">＋ Create Debate</a><a class="active" href="#room">◈ Debate Room</a><a href="#ai-title">✧ AI Chat</a><a href="#tally">▤ Results</a><a href="#final">◎ Final Verdict</a><div class="tip">★ Think bigger<br><small>Explore ideas. Challenge assumptions.</small></div>';
-const main=document.createElement('main');main.className='app-main';
-const hero=document.createElement('section');hero.className='hero';hero.innerHTML='<div class="eyebrow">THINKORA · YOUR IDEAS, CHALLENGED</div><h1><span>Debate.</span> <span>Explore.</span> <span>Decide.</span></h1><p>Engage with 300 simulated perspectives and AI-powered insights.</p>';
-main.append(hero);
-const question=right.querySelector('.card');main.append(question);
-main.append(left);
-const results=document.createElement('div');results.className='results-grid';
-[...right.children].forEach(el=>results.append(el));main.append(results);
-const rail=document.createElement('aside');rail.className='app-right';rail.append(ai);shell.append(side,main,rail);
-layout.remove();wrap.insertBefore(shell,wrap.firstChild);
-const oldTitle=wrap.querySelector('.brand-kicker');if(oldTitle)oldTitle.remove();
-const h=wrap.querySelector(':scope > h1');if(h)h.remove();
-const sub=wrap.querySelector(':scope > .sub');if(sub)sub.remove();
-const note=wrap.querySelector('.note');if(note)note.textContent='The crowd panel represents 300 simulated voices across three groups. AI analysis is generated separately and may use a fallback provider when needed.';
-side.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',()=>{side.querySelectorAll('a').forEach(x=>x.classList.remove('active'));a.classList.add('active')}));
-})();
-</script></body>
+</body>
 </html>
