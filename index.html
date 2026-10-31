@@ -96,6 +96,21 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 .plugin-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel);display:flex;flex-direction:column;gap:11px;min-width:0}.plugin-card-head{display:flex;align-items:center;gap:11px}.plugin-icon{width:43px;height:43px;flex:none;display:grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--accent);font-weight:800;font-size:1rem}.plugin-card h3{margin:0;font:700 1rem 'Space Grotesk',sans-serif}.plugin-meta{color:var(--muted);font-size:.73rem;margin-top:3px}.plugin-card p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.55;min-height:40px}.plugin-card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}.plugin-card-actions button,.plugin-run button{padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--ink);font-size:.8rem}.plugin-card-actions button.primary,.plugin-run button.primary{background:var(--accent);border-color:var(--accent);color:#06150f;font-weight:700}.plugin-card-actions button:disabled{opacity:.45;cursor:not-allowed}.plugin-run{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:12px}.plugin-run textarea{width:100%;min-height:85px;resize:vertical;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font: .83rem/1.5 ui-monospace,monospace}.plugin-output{padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font: .82rem/1.5 ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:240px;overflow:auto}.plugin-empty{padding:25px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}.plugin-note{color:var(--muted);font-size:.76rem;line-height:1.5}
 @media(max-width:700px){.plugin-grid{grid-template-columns:1fr}.plugin-hero{padding:17px}}
 
+
+/* Thinkora Video Studio */
+.video-studio{width:100%;max-width:1180px;margin:8px auto 28px;display:grid;gap:15px}
+.video-hero{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 20px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(125deg,color-mix(in srgb,var(--accent) 9%,var(--panel)),var(--panel))}
+.video-hero h2{font:700 1.45rem 'Space Grotesk',sans-serif;margin:0 0 5px}.video-hero p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.5}
+.video-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,.8fr);gap:14px;align-items:start}
+.video-preview-panel,.video-controls-panel,.video-timeline-panel{min-width:0;border:1px solid var(--line);border-radius:13px;background:var(--panel);padding:14px}
+.video-preview-stage{position:relative;display:grid;place-items:center;min-height:360px;max-height:66vh;overflow:hidden;border-radius:10px;background:#05080e}
+.video-preview-stage video{display:block;max-width:100%;max-height:62vh;width:auto;height:auto;object-fit:contain}
+.video-overlay-text{position:absolute;left:8%;right:8%;top:50%;transform:translateY(-50%);text-align:center;color:white;font:800 clamp(18px,3vw,38px)/1.12 'Space Grotesk',sans-serif;text-shadow:0 2px 8px #000,0 3px 18px #000;overflow-wrap:anywhere;pointer-events:none;white-space:pre-wrap}
+.video-preview-empty{padding:32px 18px;text-align:center;color:#9aa9c0;max-width:360px}.video-preview-empty strong{display:block;color:#eef4ff;font-size:1rem;margin-bottom:7px}
+.video-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}.video-btn{padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--ink);font-size:.8rem;font-weight:600}.video-btn.primary{background:var(--accent);color:#06150f;border-color:var(--accent)}.video-btn:disabled{opacity:.45;cursor:not-allowed}
+.video-control-group{display:grid;gap:7px;padding:12px 0;border-bottom:1px solid var(--line)}.video-control-group:last-child{border-bottom:0;padding-bottom:2px}.video-control-group label,.video-control-title{font-size:.78rem;color:var(--muted);font-weight:700}.video-control-group input[type=text],.video-control-group input[type=number],.video-control-group select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);outline:none}.video-control-group input[type=range]{width:100%;accent-color:var(--accent)}.video-two-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px}.video-small{font-size:.72rem;color:var(--muted)}.video-timeline-panel{display:grid;gap:10px}.video-timeline-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}.video-timeline-head strong{font:600 .95rem 'Space Grotesk',sans-serif}.video-track{height:14px;border-radius:8px;background:var(--panel2);position:relative;overflow:hidden}.video-track-fill{position:absolute;inset:0 auto 0 0;width:0;background:color-mix(in srgb,var(--accent) 65%,var(--accent2));border-radius:8px}.video-timeline-panel input[type=range]{width:100%;accent-color:var(--accent)}.video-status{font-size:.76rem;color:var(--muted);line-height:1.5;overflow-wrap:anywhere}.video-progress{height:7px;border-radius:9px;background:var(--panel2);overflow:hidden}.video-progress span{display:block;height:100%;width:0;background:var(--accent);transition:width .15s}
+@media(max-width:850px){.video-layout{grid-template-columns:1fr}.video-preview-stage{min-height:280px}.video-preview-stage video{max-height:52vh}}
+
 </style>
 </head>
 <body>
@@ -108,6 +123,7 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
   <button class="nav-item" id="codeLabNav" type="button"><span class="nav-icon">⌘</span><span>Code Lab</span><span class="nav-meta">Build</span></button>
   <button class="nav-item" id="pluginStoreNav" type="button"><span class="nav-icon">▦</span><span>Plugin Store</span></button>
   <button class="nav-item" id="developerStudioNav" type="button"><span class="nav-icon">⌘</span><span>Developer Studio</span></button>
+  <button class="nav-item" id="videoStudioNav" type="button"><span class="nav-icon">▶</span><span>Video Studio</span><span class="nav-meta">Edit</span></button>
  </nav>
  <div class="nav-label">Your conversations</div>
  <input class="search" id="searchHistory" type="search" placeholder="⌕  Search chats" aria-label="Search conversations">
@@ -154,6 +170,7 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
  </div>
 </main>
 </div>
+<script src="/video-studio.js"></script>
 <script>
 (()=>{
 const $=id=>document.getElementById(id);
@@ -261,6 +278,7 @@ function renderPluginCards(){
 
 $('pluginStoreNav').onclick=openPluginStore;
 $('developerStudioNav').onclick=()=>{setWorkspaceActive('developerStudioNav');showToolPage('Developer Studio','Build and submit plugins for review. Public publishing requires developer accounts, server-side validation and a secure execution environment.',[{name:'Plugin manifest',detail:'Define a plugin name, description, version and permitted actions.'},{name:'API connection',detail:'Keep credentials on the server and request only necessary permissions.'},{name:'Submit for review',detail:'Publishing will be enabled after the backend registry and review process are configured.'}]);};
+$('videoStudioNav').onclick=()=>window.openVideoStudio?.();
 
 mode.addEventListener('change',()=>{input.placeholder=mode.value==='code'?'Describe the code you want to build or debug...':mode.value==='debate'?'Enter a topic to debate...':'Message Thinkora...';});
 search.addEventListener('input',renderHistory);
