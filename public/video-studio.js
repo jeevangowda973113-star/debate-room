@@ -64,4 +64,8 @@ function openVideoStudio(){
  scrollTo(0,0);
 }
 window.openVideoStudio=openVideoStudio;
+// Bind the editor directly from its own script so a later app-script error
+// cannot leave the sidebar button without a click handler.
+const videoNav=document.getElementById('videoStudioNav');
+if(videoNav) videoNav.addEventListener('click',openVideoStudio);
 })();
