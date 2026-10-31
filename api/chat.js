@@ -204,7 +204,9 @@ export default async function handler(req, res) {
         safeMessages.map(message => (message.role === "model" ? "Assistant: " : "User: ") + message.text).join("\n\n");
     }
 
-    const latestPrompt = safeMessages.length ? safeMessages[safeMessages.length - 1].text : input;\n    const complexRequest = isComplexRequest(latestPrompt);\n    const outputTokens = task === "debate" ? 3000 : complexRequest ? 3000 : mode === "coding" || mode === "reasoning" ? 2400 : 1600;
+    const latestPrompt = safeMessages.length ? safeMessages[safeMessages.length - 1].text : input;
+    const complexRequest = isComplexRequest(latestPrompt);
+    const outputTokens = task === "debate" ? 3000 : complexRequest ? 3000 : mode === "coding" || mode === "reasoning" ? 2400 : 1600;
     let geminiFailure = null;
 
     if (geminiKey) {
