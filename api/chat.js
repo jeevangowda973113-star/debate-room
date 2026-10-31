@@ -6,7 +6,7 @@ const REQUEST_TIMEOUT_MS = 40000;
 
 function isComplexRequest(message) {
   const text = String(message || "");
-  return text.length > 700 || /\\b(architecture|system design|step by step|in depth|deep dive|compare|evaluate|debug|optimise|optimize|research|strategy|trade.?offs|proof|derive|multiple constraints)\\b/i.test(text);
+  return text.length > 700 || /\b(architecture|system design|step by step|in depth|deep dive|compare|evaluate|debug|optimise|optimize|research|strategy|trade.?offs|proof|derive|multiple constraints)\b/i.test(text);
 }
 
 function cleanText(value, max = MAX_TOPIC_CHARS) {
