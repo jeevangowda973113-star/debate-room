@@ -170,7 +170,7 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
  </div>
 </main>
 </div>
-<script src="/video-studio.js" defer></script>
+<script src="/video-studio.js"></script>
 <script>
 (()=>{
 const $=id=>document.getElementById(id);
@@ -278,7 +278,7 @@ function renderPluginCards(){
 
 $('pluginStoreNav').onclick=openPluginStore;
 $('developerStudioNav').onclick=()=>{setWorkspaceActive('developerStudioNav');showToolPage('Developer Studio','Build and submit plugins for review. Public publishing requires developer accounts, server-side validation and a secure execution environment.',[{name:'Plugin manifest',detail:'Define a plugin name, description, version and permitted actions.'},{name:'API connection',detail:'Keep credentials on the server and request only necessary permissions.'},{name:'Submit for review',detail:'Publishing will be enabled after the backend registry and review process are configured.'}]);};
-$('videoStudioNav').onclick=()=>window.openVideoStudio?.();
+$('videoStudioNav').onclick=()=>{if(typeof window.openVideoStudio==='function'){window.openVideoStudio()}else{alert('Video Studio is still loading. Refresh Thinkora and try again.')}};
 
 mode.addEventListener('change',()=>{input.placeholder=mode.value==='code'?'Describe the code you want to build or debug...':mode.value==='debate'?'Enter a topic to debate...':'Message Thinkora...';});
 search.addEventListener('input',renderHistory);
