@@ -155,7 +155,8 @@ export default async function handler(req, res) {
 
   try {
     const modelEndpoint = process.env.THINKORA_MODEL_URL;
-    const modelName = process.env.THINKORA_MODEL || "qwen2.5:7b";
+    const defaultModelName = process.env.THINKORA_MODEL || "qwen2.5:7b";
+    const reasoningModelName = process.env.THINKORA_REASONING_MODEL || "";
     const modelApiKey = process.env.THINKORA_MODEL_API_KEY;
     if (!modelEndpoint) {
       return res.status(503).json({
@@ -197,6 +198,7 @@ export default async function handler(req, res) {
     const latestPrompt = safeMessages.length ? safeMessages[safeMessages.length - 1].text : input;
     const complexRequest = isComplexRequest(latestPrompt);
     const outputTokens = task === "debate" ? 3000 : complexRequest ? 3000 : mode === "coding" || mode === "reasoning" ? 2400 : 1600;
+    const modelName = complexRequest && reasoningModelName ? reasoningModelName : defaultModelName;
 
     const reply = await callThinkoraModel(
       modelEndpoint,
