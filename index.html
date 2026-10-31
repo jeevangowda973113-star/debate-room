@@ -236,11 +236,11 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;bac
 <div class="card"><h3>Room average by round</h3>
 <table><thead><tr><th>Round</th><th>People</th><th>CEOs</th><th>Bots</th><th>Room</th></tr></thead><tbody id="tally"><tr><td colspan="5" class="muted">Nothing yet.</td></tr></tbody></table></div>
 <div class="card" id="final"><h3>Final answer</h3><p class="muted">The answer appears after round 3.</p></div>
-<div class="card" id="geminiDebate"><h3>Groq debate</h3><p class="muted">Gemini will analyse the topic across three rounds.</p></div>\n<div class="card" id="definition"><h3>Topic definition</h3><p class="muted">A clear definition of your debate topic will appear here after the debate.</p></div>
+<div class="card" id="Thinkora AIDebate"><h3>Thinkora AI debate</h3><p class="muted">Thinkora AI will analyse the topic across three rounds.</p></div>\n<div class="card" id="definition"><h3>Topic definition</h3><p class="muted">A clear definition of your debate topic will appear here after the debate.</p></div>
 <div class="card" id="trace"><h3>How the room reasoned</h3><p class="muted">Sub-questions and the biggest changes of mind appear here.</p></div>
 </aside>
 </div>
-<p class="note">The 300 voices show a simulated crowd response. Gemini separately analyses the topic in three real AI-powered debate rounds, challenges arguments, and provides a final balanced assessment.</p>
+<p class="note">The 300 voices show a simulated crowd response. Thinkora AI separately analyses the topic in three real AI-powered debate rounds, challenges arguments, and provides a final balanced assessment.</p>
 </div>
 <script>
 const $=s=>document.querySelector(s);
@@ -288,7 +288,7 @@ async function readApiJson(response){
  if(!response.ok)throw new Error(data.error||("Request failed (HTTP "+response.status+")."));
  return data;
 }
-async function askGeminiDebate(topic,round,previous){
+async function askThinkora AIDebate(topic,round,previous){
  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),55000);
  try{
   const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({task:'debate',topic,round,previous})});
@@ -296,15 +296,15 @@ async function askGeminiDebate(topic,round,previous){
   return data.reply;
  }finally{clearTimeout(timeout)}
 }
-function addGeminiRound(round,reply){
+function addThinkora AIRound(round,reply){
  const section=document.createElement('section');section.style.marginTop='12px';
  const heading=document.createElement('h4');heading.textContent='Round '+round+(round===1?' · Independent analysis':round===2?' · Challenge and rebuttal':' · Final judgment');
  const body=document.createElement('p');body.style.whiteSpace='pre-wrap';body.textContent=reply;
- section.append(heading,body);$('#geminiDebate').appendChild(section);
+ section.append(heading,body);$('#Thinkora AIDebate').appendChild(section);
 }
 async function run(){
 const q=$('#q').value.trim();if(!q){$('#status').textContent='Type a question first.';return}
-$('#go').disabled=true;A=build();$('#tally').innerHTML='';$('#geminiDebate').innerHTML='<h3>Groq debate</h3><p class="muted">Groq is analysing the topic across three rounds...</p>';let geminiRounds=[];
+$('#go').disabled=true;A=build();$('#tally').innerHTML='';$('#Thinkora AIDebate').innerHTML='<h3>Thinkora AI debate</h3><p class="muted">Thinkora AI is analysing the topic across three rounds...</p>';let Thinkora AIRounds=[];
 const names=['independent opinions','hearing the room','final positions'];
 for(let rd=1;rd<=3;rd++){
 $('#status').textContent='Round '+rd+' of 3: '+names[rd-1];
@@ -315,16 +315,16 @@ const pm=[0,1,2].map(i=>mean(A.filter(a=>a.p==i)));
 $('#tally').insertAdjacentHTML('beforeend','<tr><td>'+rd+'</td>'+pm.map(v=>'<td>'+fmt(v)+'</td>').join('')+'<td><b>'+fmt(mean(A))+'</b></td></tr>');
 await wait(350);
 }
-$('#status').textContent='The crowd rounds are complete. Groq is preparing its full three-round analysis...';
+$('#status').textContent='The crowd rounds are complete. Thinkora AI is preparing its full three-round analysis...';
 try{
  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),50000);
  let response,data;
  try{response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({task:'debate',topic:q})});data=await readApiJson(response);}
  finally{clearTimeout(timeout);}
- if(!response.ok)throw new Error(data.error||'Gemini could not complete the debate.');
- const reply=String(data.reply||'').trim();if(!reply)throw new Error('Groq returned an empty response.');
- geminiRounds=[reply];
- $('#geminiDebate').innerHTML='<h3>Groq debate</h3>';
+ if(!response.ok)throw new Error(data.error||'Thinkora AI could not complete the debate.');
+ const reply=String(data.reply||'').trim();if(!reply)throw new Error('Thinkora AI returned an empty response.');
+ Thinkora AIRounds=[reply];
+ $('#Thinkora AIDebate').innerHTML='<h3>Thinkora AI debate</h3>';
  const sections=[
  ['ROUND 1 — INDEPENDENT ANALYSIS','Round 1 · Independent analysis'],
  ['ROUND 2 — CHALLENGE AND REBUTTAL','Round 2 · Challenge and rebuttal'],
@@ -339,18 +339,18 @@ try{
   const section=document.createElement('section');section.style.marginTop='12px';
   const h=document.createElement('h4');h.textContent=s[1];
   const p=document.createElement('p');p.style.whiteSpace='pre-wrap';p.textContent=part;
-  section.append(h,p);$('#geminiDebate').appendChild(section);
+  section.append(h,p);$('#Thinkora AIDebate').appendChild(section);
  });
  const defStart=findHeading(reply,'TOPIC DEFINITION');
  const definition=$('#definition');
  if(defStart>=0){definition.innerHTML='<h3>Topic definition</h3><p></p>';definition.querySelector('p').style.whiteSpace='pre-wrap';definition.querySelector('p').textContent=reply.slice(defStart+'TOPIC DEFINITION'.length).trim();}
- else {definition.innerHTML='<h3>Topic definition</h3><p class="muted">Gemini did not include a separate definition. See its full analysis above.</p>';}
+ else {definition.innerHTML='<h3>Topic definition</h3><p class="muted">Thinkora AI did not include a separate definition. See its full analysis above.</p>';}
  const finalStart=findHeading(reply,'ROUND 3 — FINAL JUDGMENT');
- if(finalStart>=0){const finalText=reply.slice(finalStart+'ROUND 3 — FINAL JUDGMENT'.length,defStart>finalStart?defStart:reply.length).trim();const h=document.createElement('h3');h.style.marginTop='14px';h.textContent='Groq conclusion';const p=document.createElement('p');p.style.whiteSpace='pre-wrap';p.textContent=finalText;$('#final').append(h,p);}
+ if(finalStart>=0){const finalText=reply.slice(finalStart+'ROUND 3 — FINAL JUDGMENT'.length,defStart>finalStart?defStart:reply.length).trim();const h=document.createElement('h3');h.style.marginTop='14px';h.textContent='Thinkora AI conclusion';const p=document.createElement('p');p.style.whiteSpace='pre-wrap';p.textContent=finalText;$('#final').append(h,p);}
 }catch(error){
- const note=document.createElement('p');note.className='muted';note.textContent='Groq could not load: '+(error.name==='AbortError'?'request timed out':error.message);
- $('#geminiDebate').appendChild(note);
- $('#definition').innerHTML='<h3>Topic definition</h3><p class="muted">'+(error.message||'Gemini is unavailable. Please try again later.')+'</p>';
+ const note=document.createElement('p');note.className='muted';note.textContent='Thinkora AI could not load: '+(error.name==='AbortError'?'request timed out':error.message);
+ $('#Thinkora AIDebate').appendChild(note);
+ $('#definition').innerHTML='<h3>Topic definition</h3><p class="muted">'+(error.message||'Thinkora AI is unavailable. Please try again later.')+'</p>';
 }
 const pm=[0,1,2].map(i=>mean(A.filter(a=>a.p==i))),o=(pm[0]+pm[1]+pm[2])/3;
 const f=A.filter(a=>a.s>.25).length/3,ag=A.filter(a=>a.s<-.25).length/3,u=100-Math.round(f)-Math.round(ag);
@@ -400,7 +400,7 @@ form.addEventListener("submit",async(event)=>{
  addMessage("user",text);
  input.value="";
  send.disabled=true;
- status.textContent="Groq is thinking...";
+ status.textContent="Thinkora AI is thinking...";
  try{
   const response=await fetch("/api/chat",{
    method:"POST",
@@ -410,7 +410,7 @@ form.addEventListener("submit",async(event)=>{
   const data=await readApiJson(response);
   if(!response.ok)throw new Error(data.error||"Could not get a reply.");
   const reply=String(data.reply||"").trim();
-  if(!reply)throw new Error("Gemini returned an empty reply.");
+  if(!reply)throw new Error("Thinkora AI returned an empty reply.");
   history.push({role:"model",text:reply});
   addMessage("model",reply);
   status.textContent="";
