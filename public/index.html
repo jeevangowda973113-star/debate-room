@@ -74,6 +74,7 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 .hint{font-size:.72rem;color:var(--muted)}
 .send{width:36px;height:36px;border:0;border-radius:11px;background:var(--accent);color:#06150f;display:grid;place-items:center;font-size:18px;font-weight:800;transition:.18s}
 .send:disabled{opacity:.35;cursor:not-allowed}.send:not(:disabled):hover{transform:translateY(-1px);filter:brightness(1.08)}
+.mic-btn{width:36px;height:36px;flex:none;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:var(--panel2);color:var(--muted);font-size:17px;transition:.18s}.mic-btn:hover:not(:disabled){color:var(--ink);border-color:var(--accent)}.mic-btn:disabled{opacity:.35;cursor:not-allowed}.mic-btn.listening{background:color-mix(in srgb,#ef6262 18%,var(--panel));border-color:#ef6262;color:#ff7777;animation:micPulse 1.2s infinite}@keyframes micPulse{50%{box-shadow:0 0 0 5px #ef626222}}
 .disclaimer{text-align:center;color:var(--muted);font-size:.7rem;margin:9px 0 0}
 .mobile-menu{display:none}
 .empty-history{padding:12px 9px;color:var(--muted);font-size:.82rem}
@@ -124,6 +125,7 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
     <textarea id="prompt" rows="1" maxlength="5000" placeholder="Message Thinkora..." aria-label="Message Thinkora"></textarea>
     <div class="composer-bottom">
      <div class="composer-tools"><select class="mode-select" id="mode" aria-label="Conversation mode"><option value="chat">✦ Ask Thinkora</option><option value="debate">⚖ Debate a topic</option></select><span class="hint">Enter to send · Shift + Enter for a new line</span></div>
+     <button class="mic-btn" id="micButton" type="button" aria-label="Start voice input" title="Voice input">🎙</button>
      <button class="send" id="send" type="submit" aria-label="Send message" disabled>↑</button>
     </div>
    </form>
@@ -135,7 +137,7 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 <script>
 (()=>{
 const $=id=>document.getElementById(id);
-const form=$('chatForm'),input=$('prompt'),send=$('send'),messagesEl=$('messages'),welcome=$('welcome'),historyEl=$('history'),search=$('searchHistory'),sidebar=$('sidebar'),conversation=$('conversation'),pageLabel=$('pageLabel'),mode=$('mode');
+const form=$('chatForm'),input=$('prompt'),send=$('send'),micButton=$('micButton'),messagesEl=$('messages'),welcome=$('welcome'),historyEl=$('history'),search=$('searchHistory'),sidebar=$('sidebar'),conversation=$('conversation'),pageLabel=$('pageLabel'),mode=$('mode');
 const STORAGE='thinkora-conversations-v1',THEME='thinkora-theme-v1';
 let chats=[],activeId=null,busy=false;
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -157,6 +159,11 @@ catch(error){$('typing')?.remove();const msg=error.message||'Something went wron
 finally{setBusy(false);input.focus();scrollToLatest()}}
 form.addEventListener('submit',e=>{e.preventDefault();submit(input.value)});
 input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,180)+'px';send.disabled=busy||!input.value.trim()});
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recognition=null,listening=false;
+function setListening(value){listening=value;micButton.classList.toggle('listening',value);micButton.textContent=value?'■':'🎙';micButton.setAttribute('aria-label',value?'Stop voice input':'Start voice input');micButton.title=value?'Stop voice input':'Voice input';}
+if(SpeechRecognition){recognition=new SpeechRecognition();recognition.lang=navigator.language||'en-IN';recognition.continuous=true;recognition.interimResults=true;let finalTranscript='';recognition.onstart=()=>setListening(true);recognition.onresult=event=>{let interim='';for(let i=event.resultIndex;i<event.results.length;i++){const part=event.results[i][0].transcript;if(event.results[i].isFinal)finalTranscript+=part+' ';else interim+=part;}const combined=(input.value.trim()+' '+finalTranscript+interim).trim();input.value=combined;input.dispatchEvent(new Event('input'));};recognition.onerror=event=>{setListening(false);if(event.error==='not-allowed'||event.error==='service-not-allowed')alert('Microphone access is blocked. Allow microphone permission for this site in your browser settings.');else if(event.error!=='no-speech'&&event.error!=='aborted')console.warn('Voice input error:',event.error);};recognition.onend=()=>{setListening(false);};micButton.addEventListener('click',()=>{if(busy)return;if(listening){recognition.stop();return;}finalTranscript='';try{recognition.start();}catch(error){console.warn('Could not start voice input:',error);}});}else{micButton.disabled=true;micButton.title='Voice input is not supported in this browser';micButton.setAttribute('aria-label','Voice input is not supported in this browser');}
+form.addEventListener('submit',()=>{if(listening&&recognition)recognition.stop();});
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
 document.querySelectorAll('.suggestion').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.prompt;input.dispatchEvent(new Event('input'));input.focus()}));
 $('newChat').onclick=makeChat;
