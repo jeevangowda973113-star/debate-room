@@ -115,9 +115,18 @@ async function callThinkoraModel(endpoint, model, apiKey, systemInstruction, inp
     const detail = data?.error?.message || data?.error || "Thinkora model server returned HTTP " + response.status + ".";
     throw new Error(String(detail).slice(0, 220));
   }
-  const reply = data?.choices?.[0]?.message?.content;
-  if (typeof reply !== "string" || !reply.trim()) {
-    throw new Error("Thinkora model server returned an empty response.");
+  // Cloudflare Workers AI may return either a standard OpenAI response or
+  // wrap the OpenAI-compatible payload inside { result: ... }.
+  const payload = data?.result && typeof data.result === "object" ? data.result : data;
+  const choice = payload?.choices?.[0];
+  const rawContent = choice?.message?.content ?? choice?.delta?.content ?? payload?.response;
+  const reply = typeof rawContent === "string"
+    ? rawContent
+    : Array.isArray(rawContent)
+      ? rawContent.map(part => typeof part === "string" ? part : (part?.text || part?.content || "")).join("")
+      : "";
+  if (!reply.trim()) {
+    throw new Error("Thinkora model server returned an empty response. Check the model response format and output.");
   }
   return reply.trim();
 }
