@@ -1,0 +1,12 @@
+node_modules/
+.vercel/
+.env*
+.DS_Store
+__pycache__/
+*.py[cod]
+# Local training data and model weights
+data.txt
+data/
+checkpoints/
+*.pt
+*.pth
