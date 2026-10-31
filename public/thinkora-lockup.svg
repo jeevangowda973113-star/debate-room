@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 550 550">
+<rect width="550" height="550" fill="#050505"/>
+<g transform="translate(0 0)">
+<path d="M165 149H377L331 188H272V375L228 343V188H165Z" fill="url(#silver)"/>
+<path d="M165 149L203 188H228V149Z" fill="#e6e7e9"/>
+<path d="M377 149L331 188H272V149Z" fill="#777a80"/>
+<path d="M228 188L272 188V375L228 343Z" fill="url(#side)"/>
+<path d="M124 317C147 370 277 341 394 238C432 204 435 174 407 164" fill="none" stroke="url(#ring)" stroke-width="5" stroke-linecap="round"/>
+<path d="M407 164L418 151L424 169" fill="none" stroke="#e7e7e9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M405 130L411 148L429 154L411 160L405 178L399 160L381 154L399 148Z" fill="#e6e7e9"/>
+</g>
+<text x="275" y="458" text-anchor="middle" fill="#e9e9eb" font-family="Arial,sans-serif" font-size="38" letter-spacing="9">THINKORA AI</text>
+<defs>
+ <linearGradient id="silver" x1="0" y1="0" x2="0.9" y2="1"><stop stop-color="#fff"/><stop offset=".24" stop-color="#bfc1c4"/><stop offset=".5" stop-color="#f3f3f3"/><stop offset=".76" stop-color="#85888d"/><stop offset="1" stop-color="#d9dadd"/></linearGradient>
+ <linearGradient id="side" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#777a80"/><stop offset="1" stop-color="#303238"/></linearGradient>
+ <linearGradient id="ring" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#8d9096"/><stop offset=".55" stop-color="#f2f2f2"/><stop offset="1" stop-color="#777a80"/></linearGradient>
+</defs>
+</svg>
