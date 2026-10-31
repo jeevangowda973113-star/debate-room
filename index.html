@@ -236,7 +236,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;bac
 <div class="card"><h3>Room average by round</h3>
 <table><thead><tr><th>Round</th><th>People</th><th>CEOs</th><th>Bots</th><th>Room</th></tr></thead><tbody id="tally"><tr><td colspan="5" class="muted">Nothing yet.</td></tr></tbody></table></div>
 <div class="card" id="final"><h3>Final answer</h3><p class="muted">The answer appears after round 3.</p></div>
-<div class="card" id="geminiDebate"><h3>Gemini debate</h3><p class="muted">Gemini will analyse the topic across three rounds.</p></div>\n<div class="card" id="definition"><h3>Topic definition</h3><p class="muted">A clear definition of your debate topic will appear here after the debate.</p></div>
+<div class="card" id="geminiDebate"><h3>Groq debate</h3><p class="muted">Gemini will analyse the topic across three rounds.</p></div>\n<div class="card" id="definition"><h3>Topic definition</h3><p class="muted">A clear definition of your debate topic will appear here after the debate.</p></div>
 <div class="card" id="trace"><h3>How the room reasoned</h3><p class="muted">Sub-questions and the biggest changes of mind appear here.</p></div>
 </aside>
 </div>
@@ -304,7 +304,7 @@ function addGeminiRound(round,reply){
 }
 async function run(){
 const q=$('#q').value.trim();if(!q){$('#status').textContent='Type a question first.';return}
-$('#go').disabled=true;A=build();$('#tally').innerHTML='';$('#geminiDebate').innerHTML='<h3>Gemini debate</h3><p class="muted">Gemini is analysing the topic across three rounds...</p>';let geminiRounds=[];
+$('#go').disabled=true;A=build();$('#tally').innerHTML='';$('#geminiDebate').innerHTML='<h3>Groq debate</h3><p class="muted">Groq is analysing the topic across three rounds...</p>';let geminiRounds=[];
 const names=['independent opinions','hearing the room','final positions'];
 for(let rd=1;rd<=3;rd++){
 $('#status').textContent='Round '+rd+' of 3: '+names[rd-1];
@@ -315,16 +315,16 @@ const pm=[0,1,2].map(i=>mean(A.filter(a=>a.p==i)));
 $('#tally').insertAdjacentHTML('beforeend','<tr><td>'+rd+'</td>'+pm.map(v=>'<td>'+fmt(v)+'</td>').join('')+'<td><b>'+fmt(mean(A))+'</b></td></tr>');
 await wait(350);
 }
-$('#status').textContent='The crowd rounds are complete. Gemini is preparing its full three-round analysis...';
+$('#status').textContent='The crowd rounds are complete. Groq is preparing its full three-round analysis...';
 try{
  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),50000);
  let response,data;
  try{response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({task:'debate',topic:q})});data=await readApiJson(response);}
  finally{clearTimeout(timeout);}
  if(!response.ok)throw new Error(data.error||'Gemini could not complete the debate.');
- const reply=String(data.reply||'').trim();if(!reply)throw new Error('Gemini returned an empty response.');
+ const reply=String(data.reply||'').trim();if(!reply)throw new Error('Groq returned an empty response.');
  geminiRounds=[reply];
- $('#geminiDebate').innerHTML='<h3>Gemini debate</h3>';
+ $('#geminiDebate').innerHTML='<h3>Groq debate</h3>';
  const sections=[
  ['ROUND 1 — INDEPENDENT ANALYSIS','Round 1 · Independent analysis'],
  ['ROUND 2 — CHALLENGE AND REBUTTAL','Round 2 · Challenge and rebuttal'],
@@ -346,9 +346,9 @@ try{
  if(defStart>=0){definition.innerHTML='<h3>Topic definition</h3><p></p>';definition.querySelector('p').style.whiteSpace='pre-wrap';definition.querySelector('p').textContent=reply.slice(defStart+'TOPIC DEFINITION'.length).trim();}
  else {definition.innerHTML='<h3>Topic definition</h3><p class="muted">Gemini did not include a separate definition. See its full analysis above.</p>';}
  const finalStart=findHeading(reply,'ROUND 3 — FINAL JUDGMENT');
- if(finalStart>=0){const finalText=reply.slice(finalStart+'ROUND 3 — FINAL JUDGMENT'.length,defStart>finalStart?defStart:reply.length).trim();const h=document.createElement('h3');h.style.marginTop='14px';h.textContent='Gemini conclusion';const p=document.createElement('p');p.style.whiteSpace='pre-wrap';p.textContent=finalText;$('#final').append(h,p);}
+ if(finalStart>=0){const finalText=reply.slice(finalStart+'ROUND 3 — FINAL JUDGMENT'.length,defStart>finalStart?defStart:reply.length).trim();const h=document.createElement('h3');h.style.marginTop='14px';h.textContent='Groq conclusion';const p=document.createElement('p');p.style.whiteSpace='pre-wrap';p.textContent=finalText;$('#final').append(h,p);}
 }catch(error){
- const note=document.createElement('p');note.className='muted';note.textContent='Gemini could not load: '+(error.name==='AbortError'?'request timed out':error.message);
+ const note=document.createElement('p');note.className='muted';note.textContent='Groq could not load: '+(error.name==='AbortError'?'request timed out':error.message);
  $('#geminiDebate').appendChild(note);
  $('#definition').innerHTML='<h3>Topic definition</h3><p class="muted">'+(error.message||'Gemini is unavailable. Please try again later.')+'</p>';
 }
@@ -400,7 +400,7 @@ form.addEventListener("submit",async(event)=>{
  addMessage("user",text);
  input.value="";
  send.disabled=true;
- status.textContent="Gemini is thinking...";
+ status.textContent="Groq is thinking...";
  try{
   const response=await fetch("/api/chat",{
    method:"POST",
