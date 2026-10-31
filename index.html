@@ -14,7 +14,7 @@
 :root[data-theme="light"]{color-scheme:light;--bg:#f7f9fc;--sidebar:#eef2f7;--panel:#fff;--panel2:#f1f5fa;--ink:#172235;--muted:#65738a;--line:#dce3ec;--accent:#087f68;--accent2:#2869b2;--user:#e1f3ef;--shadow:0 18px 60px #19304b12}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;overflow:hidden}
 button,textarea,input{font:inherit}button{cursor:pointer}
-.app{height:100dvh;display:grid;grid-template-columns:270px minmax(0,1fr);background:var(--bg)}
+.app{height:100dvh;min-height:0;display:grid;grid-template-columns:270px minmax(0,1fr);grid-template-rows:minmax(0,1fr);background:var(--bg)}
 .sidebar{background:var(--sidebar);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;padding:18px 14px;gap:16px}
 .brand{display:flex;align-items:center;gap:11px;padding:4px 8px 12px;font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:1.15rem;letter-spacing:-.04em}
 .logo{width:38px;height:38px;flex:none;display:block;object-fit:contain;border-radius:11px;filter:drop-shadow(0 4px 12px #6d35ff55)}
@@ -32,14 +32,14 @@ button,textarea,input{font:inherit}button{cursor:pointer}
 .side-action:hover{background:var(--panel2);color:var(--ink)}
 .profile{display:flex;align-items:center;gap:10px;padding:10px 8px 2px;color:var(--muted);font-size:.83rem}
 .avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);color:var(--accent);font-weight:700}
-.main{min-width:0;min-height:0;display:flex;flex-direction:column;height:100%;position:relative}
+.main{min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;height:100%;position:relative}
 .topbar{height:64px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(16px)}
 .top-left{display:flex;align-items:center;gap:12px}.mobile-brand{display:none;font-family:"Space Grotesk",sans-serif;font-weight:700}
 .page-label{font-size:.9rem;color:var(--muted)}.status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:.78rem}
 .status-dot{width:7px;height:7px;border-radius:50%;background:#48d7a6;box-shadow:0 0 12px #48d7a6}
 .icon-btn{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--muted)}
 .icon-btn:hover{color:var(--ink);border-color:var(--accent)}
-.conversation{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scroll-behavior:smooth;padding:34px 22px 22px}
+.conversation{flex:1 1 0;min-width:0;min-height:0;height:0;overflow-y:scroll;overflow-x:hidden;overscroll-behavior:contain;scroll-behavior:smooth; -webkit-overflow-scrolling:touch; touch-action:pan-y; padding:34px 22px 22px}
 .content{max-width:820px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
 .welcome{margin:auto auto 36px;width:100%;text-align:center;padding:20px 0 8px}
 .welcome-mark{width:82px;height:82px;margin:0 auto 22px;display:block;object-fit:contain;filter:drop-shadow(0 8px 24px #713cff55)}
@@ -148,8 +148,8 @@ function renderChat(){messagesEl.replaceChildren();const c=active();welcome.hidd
 function setBusy(v){busy=v;send.disabled=v||!input.value.trim();input.disabled=v;mode.disabled=v}
 function showTyping(task='chat'){const row=document.createElement('article');row.className='message assistant';row.id='typing';const a=document.createElement('div');a.className='msg-avatar';a.textContent='✦';const b=document.createElement('div');b.className='msg-body';if(task==='debate'){const plan=document.createElement('div');plan.className='debate-steps';const title=document.createElement('div');title.className='debate-steps-title';title.textContent='THREE-ROUND DEBATE';plan.append(title);[['1','Independent analysis'],['2','Challenge and rebuttal'],['3','Final judgment']].forEach(([n,label])=>{const step=document.createElement('div');step.className='debate-step';const number=document.createElement('span');number.className='debate-step-number';number.textContent=n;const text=document.createElement('span');text.textContent=label;step.append(number,text);plan.append(step)});b.append(plan)}const dots=document.createElement('span');dots.className='typing';dots.innerHTML='<i></i><i></i><i></i>';b.append(dots);row.append(a,b);messagesEl.append(row);conversation.scrollTop=conversation.scrollHeight}
 function readResponse(response){return response.text().then(raw=>{let data;try{data=JSON.parse(raw)}catch{throw new Error('The server returned an unreadable response. Please try again.')}if(!response.ok)throw new Error(data.error||'Request failed (HTTP '+response.status+').');return data})}
-async function submit(text){const prompt=text.trim();if(!prompt||busy)return;if(!active())makeChat();const c=active();if(!c)return;c.messages.push({role:'user',text:prompt});if(c.messages.length===1)c.title=titleFrom(prompt);c.updated=Date.now();save();renderHistory();welcome.hidden=true;addMessage('user',prompt,false);input.value='';input.style.height='auto';setBusy(true);showTyping(task);conversation.scrollTop=conversation.scrollHeight;
-try{const task=mode.value==='debate'?'debate':'chat';const payload=task==='debate'?{task:'debate',topic:prompt}:{task:'chat',messages:c.messages.slice(-12)};const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await readResponse(response);const reply=String(data.reply||'').trim();if(!reply)throw new Error('Thinkora returned an empty reply.');$('typing')?.remove();c.messages.push({role:'model',text:reply});c.updated=Date.now();save();addMessage('model',reply);pageLabel.textContent=c.title;renderHistory()}
+async function submit(text){const prompt=text.trim();if(!prompt||busy)return;if(!active())makeChat();const c=active();if(!c)return;c.messages.push({role:'user',text:prompt});if(c.messages.length===1)c.title=titleFrom(prompt);c.updated=Date.now();save();renderHistory();welcome.hidden=true;addMessage('user',prompt,false);input.value='';input.style.height='auto';const task=mode.value==='debate'?'debate':'chat';setBusy(true);showTyping(task);conversation.scrollTop=conversation.scrollHeight;
+try{const payload=task==='debate'?{task:'debate',topic:prompt}:{task:'chat',messages:c.messages.slice(-12)};const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await readResponse(response);const reply=String(data.reply||'').trim();if(!reply)throw new Error('Thinkora returned an empty reply.');$('typing')?.remove();c.messages.push({role:'model',text:reply});c.updated=Date.now();save();addMessage('model',reply);pageLabel.textContent=c.title;renderHistory()}
 catch(error){$('typing')?.remove();const msg=error.message||'Something went wrong. Please try again.';addMessage('model','I could not complete that request: '+msg);c.messages.pop();save()}
 finally{setBusy(false);input.focus();conversation.scrollTop=conversation.scrollHeight}}
 form.addEventListener('submit',e=>{e.preventDefault();submit(input.value)});
