@@ -20,6 +20,7 @@ button,textarea,input{font:inherit}button{cursor:pointer}
 .logo{width:38px;height:38px;flex:none;display:block;object-fit:contain;border-radius:11px;filter:drop-shadow(0 4px 12px #6d35ff55)}
 .new-chat{width:100%;display:flex;align-items:center;gap:10px;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);font-weight:600;text-align:left;transition:.18s}
 .new-chat:hover{border-color:var(--accent);background:var(--panel2)}
+.sidebar-nav{display:grid;gap:4px}.sidebar-group{padding:13px 9px 5px;color:var(--muted);font-size:.69rem;text-transform:uppercase;letter-spacing:.13em;font-weight:700}.nav-item{width:100%;min-height:40px;display:flex;align-items:center;gap:11px;padding:9px 11px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--muted);text-align:left;font-size:.88rem;font-weight:600;transition:background .16s,border-color .16s,color .16s}.nav-item:hover{background:var(--panel2);color:var(--ink)}.nav-item.active{background:color-mix(in srgb,var(--accent) 12%,var(--panel));border-color:color-mix(in srgb,var(--accent) 28%,var(--line));color:var(--ink)}.nav-icon{width:20px;display:grid;place-items:center;color:var(--accent);font-size:1rem}.nav-item .nav-meta{margin-left:auto;font-size:.67rem;color:var(--muted);font-weight:500}.new-chat{background:var(--panel);border-color:var(--line);box-shadow:0 2px 8px #0000000a}
 .nav-label{padding:8px 9px 4px;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
 .search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);outline:none}
 .search:focus,.composer textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
@@ -89,9 +90,12 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 <aside class="sidebar" id="sidebar">
  <div class="brand"><img class="logo" src="/thinkora-mark.svg" alt="Thinkora logo"><span>Thinkora</span></div>
  <button class="new-chat" id="newChat"><span>＋</span> New chat</button>
- <button class="new-chat" id="codeLabNav"><span>⌘</span> Code Lab</button>
- <button class="new-chat" id="pluginStoreNav"><span>▦</span> Plugin Store</button>
- <button class="new-chat" id="developerStudioNav"><span>⚙</span> Developer Studio</button>
+ <nav class="sidebar-nav" aria-label="Main navigation">
+  <div class="sidebar-group">Workspace</div>
+  <button class="nav-item" id="codeLabNav" type="button"><span class="nav-icon">⌘</span><span>Code Lab</span><span class="nav-meta">Build</span></button>
+  <button class="nav-item" id="pluginStoreNav" type="button"><span class="nav-icon">▦</span><span>Plugin Store</span></button>
+  <button class="nav-item" id="developerStudioNav" type="button"><span class="nav-icon">⌘</span><span>Developer Studio</span></button>
+ </nav>
  <div class="nav-label">Your conversations</div>
  <input class="search" id="searchHistory" type="search" placeholder="⌕  Search chats" aria-label="Search conversations">
  <div class="history" id="history"><div class="empty-history">Your recent chats will appear here.</div></div>
@@ -141,6 +145,8 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 const $=id=>document.getElementById(id);
 const form=$('chatForm'),input=$('prompt'),send=$('send'),micButton=$('micButton'),messagesEl=$('messages'),welcome=$('welcome'),historyEl=$('history'),search=$('searchHistory'),sidebar=$('sidebar'),conversation=$('conversation'),pageLabel=$('pageLabel'),mode=$('mode');
 const STORAGE='thinkora-conversations-v1',THEME='thinkora-theme-v1';
+const workspaceNav=['codeLabNav','pluginStoreNav','developerStudioNav'];
+function setWorkspaceActive(id){workspaceNav.forEach(key=>$(key)?.classList.toggle('active',key===id));}
 let chats=[],activeId=null,busy=false;
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 function load(){try{const v=JSON.parse(localStorage.getItem(STORAGE)||'[]');chats=Array.isArray(v)?v:[]}catch{chats=[]}}
@@ -171,11 +177,11 @@ if(SpeechRecognition){recognition=new SpeechRecognition();recognition.lang=navig
 form.addEventListener('submit',()=>{if(listening&&recognition)recognition.stop();});
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
 document.querySelectorAll('.suggestion').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.prompt;input.dispatchEvent(new Event('input'));input.focus()}));
-$('newChat').onclick=makeChat;
-$('codeLabNav').onclick=()=>{mode.value='code';input.placeholder='Describe the code you want to build or debug...';input.focus();sidebar.classList.remove('open');pageLabel.textContent='Code Lab'};
+$('newChat').onclick=()=>{setWorkspaceActive('');makeChat()};
+$('codeLabNav').onclick=()=>{setWorkspaceActive('codeLabNav');mode.value='code';input.placeholder='Describe the code you want to build or debug...';input.focus();sidebar.classList.remove('open');pageLabel.textContent='Code Lab'};
 function showToolPage(title,description,items){messagesEl.replaceChildren();welcome.hidden=true;const wrap=document.createElement('section');wrap.style.cssText='width:100%;max-width:760px;margin:24px auto;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--panel)';const h=document.createElement('h2');h.textContent=title;h.style.cssText='font-family:Space Grotesk,sans-serif;margin:0 0 8px';const p=document.createElement('p');p.textContent=description;p.style.cssText='color:var(--muted);line-height:1.6;margin:0 0 18px';wrap.append(h,p);items.forEach(item=>{const card=document.createElement('div');card.style.cssText='padding:13px 0;border-top:1px solid var(--line)';const strong=document.createElement('strong');strong.textContent=item.name;const detail=document.createElement('p');detail.textContent=item.detail;detail.style.cssText='color:var(--muted);font-size:.88rem;margin:5px 0 0';card.append(strong,detail);wrap.append(card)});messagesEl.append(wrap);pageLabel.textContent=title;sidebar.classList.remove('open');scrollToLatest()}
-$('pluginStoreNav').onclick=()=>showToolPage('Plugin Store','Discover integrations for Thinkora. Real plugin installation will be enabled after secure accounts, permissions and the plugin registry are connected.',[{name:'Web Search',detail:'Search the web and summarize trusted sources. Not installed yet.'},{name:'File Reader',detail:'Analyze documents you upload. Not installed yet.'},{name:'Calculator',detail:'Perform calculations and unit conversions. Not installed yet.'},{name:'Custom Plugins',detail:'Install community-built integrations after review and approval.'}]);
-$('developerStudioNav').onclick=()=>showToolPage('Developer Studio','Build and submit plugins for review. Public publishing requires developer accounts, server-side validation and a secure execution environment.',[{name:'Plugin manifest',detail:'Define a plugin name, description, version and permitted actions.'},{name:'API connection',detail:'Keep credentials on the server and request only necessary permissions.'},{name:'Submit for review',detail:'Publishing will be enabled after the backend registry and review process are configured.'}]);
+$('pluginStoreNav').onclick=()=>{setWorkspaceActive('pluginStoreNav');showToolPage('Plugin Store','Discover integrations for Thinkora. Real plugin installation will be enabled after secure accounts, permissions and the plugin registry are connected.',[{name:'Web Search',detail:'Search the web and summarize trusted sources. Not installed yet.'},{name:'File Reader',detail:'Analyze documents you upload. Not installed yet.'},{name:'Calculator',detail:'Perform calculations and unit conversions. Not installed yet.'},{name:'Custom Plugins',detail:'Install community-built integrations after review and approval.'}]);};
+$('developerStudioNav').onclick=()=>{setWorkspaceActive('developerStudioNav');showToolPage('Developer Studio','Build and submit plugins for review. Public publishing requires developer accounts, server-side validation and a secure execution environment.',[{name:'Plugin manifest',detail:'Define a plugin name, description, version and permitted actions.'},{name:'API connection',detail:'Keep credentials on the server and request only necessary permissions.'},{name:'Submit for review',detail:'Publishing will be enabled after the backend registry and review process are configured.'}]);};
 
 mode.addEventListener('change',()=>{input.placeholder=mode.value==='code'?'Describe the code you want to build or debug...':mode.value==='debate'?'Enter a topic to debate...':'Message Thinkora...';});
 search.addEventListener('input',renderHistory);
