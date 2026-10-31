@@ -22,7 +22,7 @@ async function callGroq(apiKey, systemInstruction, input, messages, task) {
       model: "openai/gpt-oss-120b",
       messages: groqMessages,
       temperature: 0.5,
-      max_tokens: task === "debate" ? 1700 : 900
+      max_tokens: task === "debate" ? 1700 : 1200
     })
   });
 
@@ -38,6 +38,42 @@ async function callGroq(apiKey, systemInstruction, input, messages, task) {
   return reply.trim();
 }
 
+const THINKORA_CHAT_INSTRUCTION = `You are Thinkora AI, a capable general-purpose assistant inside the Thinkora project.
+
+Your goal is to help users understand, create, plan, learn, and solve problems.
+For every request:
+1. Identify what the user is actually trying to achieve.
+2. Use the conversation context when it is relevant; do not ask for information the user has already provided.
+3. For difficult tasks, analyse the important parts, compare reasonable approaches, and check the answer for contradictions before responding.
+4. Give the user the useful conclusion first, followed by clear reasoning or practical steps.
+5. Separate verified facts from assumptions and opinions. Never invent statistics, sources, quotations, or capabilities.
+6. If information may be outdated and you cannot verify it, say so clearly.
+7. If a request is unclear, ask one focused clarification instead of guessing.
+8. Match the user's level of knowledge and explain technical terms simply when helpful.
+9. Be respectful, balanced, concise by default, and age-appropriate.
+10. Do not reveal private internal chain-of-thought. Provide a brief explanation, key steps, or a concise rationale instead.
+
+You do not have live web browsing or external tools in this API request. Never claim that you searched the internet, opened a website, ran code, or verified live information unless that action actually happened.`;
+
+const THINKORA_DEBATE_INSTRUCTION = `You are Thinkora's debate moderator and critical-thinking analyst.
+
+Run a fair, evidence-conscious analysis. First understand the exact question. Distinguish factual claims, assumptions, predictions, and value judgments. Present the strongest reasonable version of each side rather than weak arguments. Consider practical effects, affected groups, costs, risks, trade-offs, and missing evidence. Challenge assumptions on both sides. Never invent statistics, studies, sources, or quotations. If evidence is uncertain, say so. Do not pretend a simulated crowd vote is scientific evidence.
+
+Use these exact headings:
+ROUND 1 — INDEPENDENT ANALYSIS
+Give the 2 strongest arguments FOR and 2 AGAINST. Explain the key assumptions behind them.
+
+ROUND 2 — CHALLENGE AND REBUTTAL
+Challenge the most important assumption on each side and give a fair rebuttal. Identify what evidence would help settle the disagreement.
+
+ROUND 3 — FINAL JUDGMENT
+Give a balanced, conditional verdict; the strongest reason; the main trade-off; and what could change the conclusion.
+
+TOPIC DEFINITION
+Write exactly 2 clear, neutral paragraphs explaining the topic, its context, and why it matters.
+
+Keep the answer focused, readable, and suitable for a general audience. Do not reveal private internal chain-of-thought; give concise reasoning and conclusions.`;
+
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
@@ -46,24 +82,25 @@ export default async function handler(req, res) {
     const geminiKey = process.env.GEMINI_API_KEY;
     const groqKey = process.env.GROQ_API_KEY;
     let input = "";
-    let systemInstruction = "You are the helpful AI inside Debate Room. Be clear, balanced, accurate, and age-appropriate. Explain uncertainty and never invent facts.";
+    let systemInstruction = THINKORA_CHAT_INSTRUCTION;
     let safeMessages = [];
 
     if (task === "debate") {
       if (typeof topic !== "string" || !topic.trim()) return res.status(400).json({ error: "A topic is required." });
-      systemInstruction = "You are the lead moderator of Debate Room. Conduct a fair, evidence-conscious debate. Never invent statistics, sources or quotations. Use clear language suitable for a general audience.";
-      input = "Give a concise but useful three-round debate. Use these exact headings:\n\nROUND 1 — INDEPENDENT ANALYSIS\nGive the 2 strongest arguments FOR and 2 AGAINST.\n\nROUND 2 — CHALLENGE AND REBUTTAL\nChallenge the key assumption on each side and give a clear rebuttal.\n\nROUND 3 — FINAL JUDGMENT\nGive a balanced verdict, strongest reason, key trade-off and what evidence could change the conclusion.\n\nTOPIC DEFINITION\nWrite exactly 2 clear, neutral paragraphs explaining the topic, its context and why it matters.\n\nKeep the entire answer focused and avoid repetition. TOPIC: " + topic.slice(0, 1000);
+      systemInstruction = THINKORA_DEBATE_INSTRUCTION;
+      input = "Analyse this debate topic using the required three-round structure:\n\n" + topic.slice(0, 1000);
     } else if (task === "definition") {
       if (typeof topic !== "string" || !topic.trim()) return res.status(400).json({ error: "A topic is required." });
-      systemInstruction = "Explain topics neutrally and clearly for a general audience. Do not take either side.";
-      input = "Write 2 or 3 complete, well-developed paragraphs explaining the topic, its context and why it matters. Stay neutral. Topic: " + topic.slice(0, 1000);
+      systemInstruction = "You are Thinkora's neutral explainer. Explain topics clearly for a general audience. Define important terms, give relevant context, distinguish facts from opinions, and do not take either side. Never invent facts or sources. Do not reveal private internal chain-of-thought; provide a clear explanation.";
+      input = "Write 2 or 3 complete, well-developed paragraphs explaining the topic, its context, and why it matters. Stay neutral. Topic: " + topic.slice(0, 1000);
     } else {
       safeMessages = (Array.isArray(messages) ? messages : []).slice(-10)
-        .filter(m => ["user", "model"].includes(m?.role) && typeof m?.text === "string");
+        .filter(m => ["user", "model"].includes(m?.role) && typeof m?.text === "string")
+        .map(m => ({ role: m.role, text: m.text.slice(0, 3000) }));
       if (!safeMessages.length || safeMessages[safeMessages.length - 1].role !== "user") {
         return res.status(400).json({ error: "Send a message to start the conversation." });
       }
-      input = safeMessages.map(m => (m.role === "model" ? "Assistant: " : "User: ") + m.text.slice(0, 3000)).join("\n\n");
+      input = safeMessages.map(m => (m.role === "model" ? "Assistant: " : "User: ") + m.text).join("\n\n");
     }
 
     let geminiFailure = null;
@@ -79,7 +116,7 @@ export default async function handler(req, res) {
             system_instruction: systemInstruction,
             generation_config: {
               thinking_level: "low",
-              max_output_tokens: task === "debate" ? 1700 : 900
+              max_output_tokens: task === "debate" ? 2200 : 1200
             },
             store: false
           })
@@ -127,7 +164,7 @@ export default async function handler(req, res) {
       error: geminiFailure + " Add GROQ_API_KEY in Vercel to enable automatic backup."
     });
   } catch (error) {
-    console.error("Debate Room API error:", error);
+    console.error("Thinkora API error:", error);
     return res.status(500).json({ error: "The AI service could not complete this request. Please try again." });
   }
 }
