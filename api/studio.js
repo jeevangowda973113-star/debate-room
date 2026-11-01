@@ -7,23 +7,22 @@ module.exports = async function handler(req,res){
   const body=req.body||{},action=String(body.action||""),prompt=String(body.prompt||"").trim();
   if(!prompt||prompt.length>MAX_PROMPT)return send(res,400,{error:"Enter a prompt up to 4,000 characters."});
   if(action==="image"){
-   const token=process.env.REPLICATE_API_TOKEN;
-   if(!token)return send(res,503,{error:"Image generation is not configured. Add REPLICATE_API_TOKEN in Vercel Environment Variables."});
-   const model=String(process.env.THINKORA_IMAGE_MODEL||"black-forest-labs/flux-schnell");
-   if(!/^[a-z0-9-]+\/[a-z0-9-]+$/i.test(model))return send(res,500,{error:"THINKORA_IMAGE_MODEL must use owner/model format."});
-   const created=await fetch("https://api.replicate.com/v1/models/"+model+"/predictions",{method:"POST",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({input:{prompt,aspect_ratio:String(body.aspectRatio||"1:1"),num_outputs:1}})});
-   const prediction=await created.json().catch(()=>({}));
-   if(!created.ok)return send(res,502,{error:prediction.detail||prediction.title||"Image provider request failed."});
-   let result=prediction;
-   for(let i=0;i<35&&result.status!=="succeeded"&&result.status!=="failed"&&result.status!=="canceled";i++){
-    await new Promise(resolve=>setTimeout(resolve,1500));
-    const poll=await fetch(result.urls?.get||"https://api.replicate.com/v1/predictions/"+encodeURIComponent(result.id),{headers:{Authorization:"Bearer "+token}});
-    result=await poll.json().catch(()=>result);
-    if(!poll.ok)break;
-   }
-   if(result.status==="succeeded")return send(res,200,{ok:true,output:result.output});
-   if(result.status==="failed"||result.status==="canceled")return send(res,502,{error:result.error||"Image generation failed."});
-   return send(res,202,{ok:false,pending:true,message:"Image is still processing. Please try again in a moment.",predictionId:result.id});
+   const key=process.env.GEMINI_API_KEY||process.env.GOOGLE_GEMINI_API_KEY;
+   if(!key)return send(res,503,{error:"Gemini image generation is not configured. Add GEMINI_API_KEY in Vercel Environment Variables."});
+   const model=String(process.env.THINKORA_GEMINI_IMAGE_MODEL||"gemini-nano-banana-2.1");
+   const allowed=["1:1","16:9","9:16","4:3","3:4","4:5","5:4","3:2","2:3","21:9"];
+   const aspect=allowed.includes(String(body.aspectRatio||"1:1"))?String(body.aspectRatio||"1:1"):"1:1";
+   const response=await fetch("https://generativelanguage.googleapis.com/v1beta/interactions",{
+    method:"POST",
+    headers:{"x-goog-api-key":key,"Content-Type":"application/json"},
+    body:JSON.stringify({model,input:[{type:"text",text:prompt}],response_format:{type:"image",mime_type:"image/png",aspect_ratio:aspect,image_size:"1K"}})
+   });
+   const data=await response.json().catch(()=>({}));
+   if(!response.ok)return send(res,response.status===429?429:502,{error:data.error?.message||data.message||"Gemini image generation failed."});
+   const imageData=data.output_image?.data;
+   if(!imageData)return send(res,502,{error:"Gemini returned no image. Try a different prompt."});
+   const mime=data.output_image.mime_type||"image/png";
+   return send(res,200,{ok:true,provider:"Gemini",output:["data:"+mime+";base64,"+imageData]});
   }
   if(action==="search"){
    const key=process.env.TAVILY_API_KEY;
