@@ -39,3 +39,29 @@ A practical development setup is Ollama:
 - `api/chat.js` — Thinkora backend, prompt workflow, context handling, and self-hosted model connection
 
 **Thinkora — Think deeper. Build smarter.**
+
+
+## Backend security and reliability
+
+The API routes apply request-size checks and per-minute rate limits. For a rate limit shared across Vercel Function instances, configure an Upstash Redis database with:
+
+| Variable | Required for shared limits | Meaning |
+| --- | --- | --- |
+| `UPSTASH_REDIS_REST_URL` | Recommended | Upstash Redis REST endpoint |
+| `UPSTASH_REDIS_REST_TOKEN` | Recommended | Upstash Redis REST token |
+
+Without both Upstash variables, Thinkora uses a best-effort in-memory limit inside each running function instance. That fallback is not globally shared and should not be treated as production-grade abuse protection.
+
+The chat API reports the provider that actually generated the response. Chat, image generation, research, and Supabase plugin requests have bounded request sizes or provider timeouts.
+
+### Current provider environment variables
+
+- `GROQ_API_KEY` — optional primary chat provider
+- `GEMINI_API_KEY` or `GOOGLE_GEMINI_API_KEY` — optional chat and image provider
+- `THINKORA_MODEL_URL`, `THINKORA_MODEL_API_KEY`, `THINKORA_MODEL` — optional self-hosted OpenAI-compatible model
+- `THINKORA_VISION_MODEL`, `THINKORA_REASONING_MODEL` — optional model overrides
+- `THINKORA_GEMINI_IMAGE_MODEL` — optional Gemini image model override
+- `TAVILY_API_KEY` — optional research provider
+- `SUPABASE_URL` and `SUPABASE_ANON_KEY` (or `SUPABASE_PUBLISHABLE_KEY`) — optional community plugin database
+
+Community plugin submission and account-based installation require a valid Supabase user session and the corresponding database tables and row-level security policies. Built-in plugins do not require sign-in. Community plugin manifests are not executed as arbitrary server-side code.
