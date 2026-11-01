@@ -559,7 +559,7 @@ catch(error){const msg=error.name==='AbortError'?'The request timed out after 90
 finally{setBusy(false);if(activeId===chatId)scrollToLatest()}}
 function renderImagePreview(){imagePreview.replaceChildren();imagePreview.hidden=!selectedImages.length;selectedImages.forEach((src,index)=>{const item=document.createElement('div');item.className='image-preview-item';const img=document.createElement('img');img.src=src;img.alt='Selected photo';const remove=document.createElement('button');remove.type='button';remove.textContent='×';remove.setAttribute('aria-label','Remove image');remove.onclick=()=>{selectedImages.splice(index,1);renderImagePreview()};item.append(img,remove);imagePreview.append(item)});attachButton.disabled=busy||selectedImages.length>=4}
 function compressImage(file){return new Promise((resolve,reject)=>{if(!/^image\/(jpeg|png|webp|gif)$/.test(file.type)){reject(new Error('Choose a JPG, PNG, WEBP or GIF image.'));return}if(file.size>12*1024*1024){reject(new Error('Each image must be under 12 MB.'));return}const reader=new FileReader();reader.onerror=()=>reject(new Error('Could not read that image.'));reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error('That image could not be opened.'));img.onload=()=>{const scale=Math.min(1,1600/Math.max(img.width,img.height));const canvas=document.createElement('canvas');canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);resolve(canvas.toDataURL('image/jpeg',.78))};img.src=reader.result};reader.readAsDataURL(file)})}
-attachButton.addEventListener('click',()=>{if(!busy&&selectedImages.length<4)imageInput.click()});
+
 imageInput.addEventListener('change',async()=>{for(const file of Array.from(imageInput.files||[]).slice(0,4-selectedImages.length)){try{selectedImages.push(await compressImage(file))}catch(error){alert(error.message)}}imageInput.value='';renderImagePreview()});
 form.addEventListener('submit',e=>{e.preventDefault();submit(input.value)});
 send.addEventListener('click',e=>{e.preventDefault();if(!busy&&(input.value.trim()||selectedImages.length))submit(input.value)});
@@ -574,10 +574,11 @@ if(SpeechRecognition){recognition=new SpeechRecognition();recognition.lang=navig
 form.addEventListener('submit',()=>{if(listening&&recognition)recognition.stop();});
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
 document.querySelectorAll('.suggestion').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.prompt;input.dispatchEvent(new Event('input'));input.focus()}));
-const toolsMenu=$('toolsMenu'),toolsPlus=$('toolsPlus');
-// The plus button uses its inline toggle so it remains responsive independently.
-$('uploadImageMenu').onclick=()=>{$('imageInput').click();toolsMenu.hidden=true;toolsPlus.setAttribute('aria-expanded','false');toolsPlus.textContent='＋'};
-toolsMenu.addEventListener('click',e=>{if(e.target.closest('button:not(#uploadImageMenu)')){toolsMenu.hidden=true;toolsPlus.setAttribute('aria-expanded','false');toolsPlus.textContent='＋'}});
+// The composer plus button opens the native image picker.
+if(attachButton && imageInput){
+ attachButton.type='button';
+ attachButton.addEventListener('click',()=>{if(!busy && selectedImages.length<4){imageInput.click();}});
+}
 $('newChat').onclick=()=>{document.querySelector('.composer-wrap').style.display='';$('codeWorkspace').classList.remove('open');setWorkspaceActive('');makeChat()};
 const CODE_STORAGE='thinkora-code-lab-v1';
 let codeFiles={ 'index.html':'<!doctype html>\\n<html>\\n<head>\\n  <meta charset="utf-8">\\n  <meta name="viewport" content="width=device-width, initial-scale=1">\\n  <title>My project</title>\\n  <link rel="stylesheet" href="style.css">\\n</head>\\n<body>\\n  <main><h1>Hello, Thinkora!</h1><p>Start building something.</p></main>\\n  <script src="script.js"></script>\\n</body>\\n</html>', 'style.css':'body { font-family: system-ui, sans-serif; padding: 2rem; }\\nh1 { color: #2563eb; }', 'script.js':'console.log("Thinkora Code Lab is ready!");'};
