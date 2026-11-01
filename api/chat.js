@@ -1,8 +1,8 @@
 const MAX_HISTORY_MESSAGES = 8;
-const MAX_HISTORY_CHARS = 10000;
-const MAX_MESSAGE_CHARS = 5000;
+const MAX_HISTORY_CHARS = 14000;
+const MAX_MESSAGE_CHARS = 12000;
 const MAX_TOPIC_CHARS = 1200;
-const REQUEST_TIMEOUT_MS = 30000;
+const REQUEST_TIMEOUT_MS = 55000;
 
 function isComplexRequest(message) {
   const text = String(message || "");
