@@ -263,6 +263,24 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 .code-result .code-preview{display:block;width:100%;height:min(58vh,560px);min-height:340px;border:0;border-radius:0;background:#fff}.code-result .code-ai-response{margin:0;padding:12px 16px;border-top:1px solid var(--line);max-height:110px;font-size:.8rem}
 .code-advanced{border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}.code-advanced summary{cursor:pointer;padding:13px 16px;color:var(--muted);font-size:.82rem;font-weight:600}.code-advanced[open] summary{border-bottom:1px solid var(--line)}.code-advanced .code-grid{padding:12px;grid-template-columns:170px minmax(0,1fr);min-height:350px}.code-advanced .code-editor{min-height:340px}
 @media(max-width:650px){.code-workspace{padding:12px 0 24px;gap:14px}.code-builder-hero{margin:30px auto 0}.code-prompt-form{border-radius:18px}.code-result .code-preview{height:55vh;min-height:300px}.code-advanced .code-grid{grid-template-columns:1fr}.code-advanced .code-files{display:block}.code-advanced .code-file{width:100%}}
+/* Thinkora universal workspace additions */
+.home-eyebrow{display:inline-flex;margin:0 auto 14px;padding:6px 10px;border:1px solid var(--line);border-radius:99px;color:var(--muted);font-size:.68rem;font-weight:700;letter-spacing:.14em}
+.guided-workspace{width:100%;max-width:820px;margin:20px auto 30px;display:grid;gap:15px}
+.guided-hero{padding:24px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,#282828,#202020)}
+.guided-hero .eyebrow{font-size:.68rem;letter-spacing:.14em;color:var(--muted);font-weight:700}
+.guided-hero h2{font:600 clamp(1.55rem,4vw,2.25rem)/1.15 'Space Grotesk',sans-serif;letter-spacing:-.045em;margin:10px 0}
+.guided-hero p{margin:0;color:var(--muted);line-height:1.65;max-width:620px}
+.guided-form{display:grid;gap:11px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.guided-form label{font-size:.78rem;color:var(--muted);font-weight:600}
+.guided-form textarea{width:100%;min-height:120px;resize:vertical;padding:13px;border:1px solid var(--line);border-radius:11px;background:var(--bg);color:var(--ink);font:inherit;line-height:1.55;outline:none}
+.guided-form textarea:focus,.guided-form select:focus{border-color:#888}
+.guided-form select{padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)}
+.guided-form button{justify-self:end;padding:10px 16px;border:0;border-radius:10px;background:#f4f4f5;color:#171717;font-weight:700}
+.guided-result{min-height:70px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);line-height:1.75;overflow-wrap:anywhere}
+.guided-result:empty:before{content:'Your Thinkora response will appear here.';color:var(--muted)}
+.guided-note{font-size:.73rem;color:var(--muted);line-height:1.5}
+@media(max-width:600px){.guided-hero{padding:18px}.guided-form{padding:12px}}
+
 </style>
 </head>
 <body>
@@ -272,7 +290,9 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
  <button class="new-chat" id="newChat"><span>＋</span> New chat</button>
  <nav class="sidebar-nav" aria-label="Main navigation">
   <div class="sidebar-group">Workspace</div>
+  <button class="nav-item" id="thinkoraAgentNav" type="button"><span class="nav-icon">✦</span><span>Thinkora Agent</span><span class="nav-meta">Plan</span></button>
   <button class="nav-item" id="codeLabNav" type="button"><span class="nav-icon">⌘</span><span>Code Lab</span><span class="nav-meta">Build</span></button>
+  <button class="nav-item" id="learningModeNav" type="button"><span class="nav-icon">◉</span><span>Learning Mode</span></button>
   <button class="nav-item" id="pluginStoreNav" type="button"><span class="nav-icon">▦</span><span>Plugin Store</span></button>
   <button class="nav-item" id="developerStudioNav" type="button"><span class="nav-icon">⌘</span><span>Developer Studio</span></button>
   <button class="nav-item" id="videoStudioNav" type="button"><span class="nav-icon">▶</span><span>Video Studio</span><span class="nav-meta">Edit</span></button>
@@ -295,13 +315,14 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
   <div class="content" id="content">
    <div class="welcome" id="welcome">
     <img class="welcome-mark" src="/thinkora-mark.svg" alt="Thinkora AI logo">
-    <h1>What would you like<br>to explore today?</h1>
-    <p>Ask anything. Think clearly. Create something great.</p>
+    <div class="home-eyebrow">YOUR AI WORKSPACE</div>
+    <h1>Think it. Build it.<br>Get it done.</h1>
+    <p>One workspace for learning, creating, coding and turning ideas into real projects.</p>
     <div class="suggestions">
-     <button class="suggestion" data-prompt="Explain a difficult topic in simple words."><strong>Learn something</strong>Break down a topic step by step</button>
-     <button class="suggestion" data-prompt="Help me brainstorm a practical business idea with low starting cost."><strong>Explore ideas</strong>Find and shape a new idea</button>
-     <button class="suggestion" data-prompt="Help me write a compelling short video script."><strong>Create content</strong>Write a script, story, or prompt</button>
-     <button class="suggestion" data-prompt="Compare the pros and cons of two options and recommend one."><strong>Make a decision</strong>Compare options and trade-offs</button>
+     <button class="suggestion" data-prompt="Help me turn this goal into a practical step-by-step plan with clear deliverables."><strong>✦ Plan with Agent</strong>Turn a goal into an actionable workflow</button>
+     <button class="suggestion" data-prompt="Help me build a complete website or app from this idea."><strong>⌘ Build with Code Lab</strong>Create a project from one prompt</button>
+     <button class="suggestion" data-prompt="Teach me this topic step by step, with examples and a short practice exercise."><strong>◉ Learn a topic</strong>Understand concepts at your own pace</button>
+     <button class="suggestion" data-prompt="Help me create a short video concept, script and shot list."><strong>▶ Create content</strong>Plan videos and creative projects</button>
     </div>
    </div>
    <div class="messages" id="messages"></div>
@@ -334,7 +355,7 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 const $=id=>document.getElementById(id);
 const form=$('chatForm'),input=$('prompt'),send=$('send'),micButton=$('micButton'),attachButton=$('attachButton'),imageInput=$('imageInput'),imagePreview=$('imagePreview'),messagesEl=$('messages'),welcome=$('welcome'),historyEl=$('history'),search=$('searchHistory'),sidebar=$('sidebar'),conversation=$('conversation'),pageLabel=$('pageLabel'),mode=$('mode');
 const STORAGE='thinkora-conversations-v1',THEME='thinkora-theme-v1';
-const workspaceNav=['codeLabNav','pluginStoreNav','developerStudioNav','videoStudioNav'];
+const workspaceNav=['thinkoraAgentNav','codeLabNav','learningModeNav','pluginStoreNav','developerStudioNav','videoStudioNav'];
 function setWorkspaceActive(id){workspaceNav.forEach(key=>$(key)?.classList.toggle('active',key===id));}
 let chats=[],activeId=null,busy=false,selectedImages=[];
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -485,6 +506,30 @@ function renderPluginCards(){
   grid.append(card);
  });
 }
+
+function openGuidedWorkspace(kind){
+ const isAgent=kind==='agent',navId=isAgent?'thinkoraAgentNav':'learningModeNav';
+ setWorkspaceActive(navId);document.querySelector('.composer-wrap').style.display='';$('codeWorkspace')?.classList.remove('open');messagesEl.replaceChildren();welcome.hidden=true;pageLabel.textContent=isAgent?'Thinkora Agent':'Learning Mode';sidebar.classList.remove('open');
+ const root=document.createElement('section');root.className='guided-workspace';
+ root.innerHTML=isAgent
+ ? '<div class="guided-hero"><div class="eyebrow">THINKORA AGENT</div><h2>Bring a goal. Leave with a plan.</h2><p>Describe what you want to accomplish. Thinkora will break it into clear steps, identify useful deliverables and help prepare the work in this conversation.</p></div><form class="guided-form" id="guidedForm"><label for="guidedPrompt">What do you want to get done?</label><textarea id="guidedPrompt" maxlength="4000" required placeholder="Example: Help me launch a small local business. Research the idea, outline the costs and prepare a simple launch plan."></textarea><div class="guided-note">Thinkora can plan and prepare work here. External actions, purchases and account changes are not performed automatically.</div><button type="submit">Create my plan ↗</button></form><div class="guided-result" id="guidedResult" aria-live="polite"></div>'
+ : '<div class="guided-hero"><div class="eyebrow">THINKORA LEARNING MODE</div><h2>Understand it, not just memorize it.</h2><p>Learn a topic with clear explanations, examples, guided steps and practice questions suited to your level.</p></div><form class="guided-form" id="guidedForm"><label for="guidedPrompt">What would you like to learn?</label><textarea id="guidedPrompt" maxlength="4000" required placeholder="Example: Explain how electricity flows in a simple circuit, with examples."></textarea><label for="guidedLevel">Learning level</label><select id="guidedLevel"><option>Beginner</option><option selected>Intermediate</option><option>Advanced</option></select><button type="submit">Start learning ↗</button></form><div class="guided-result" id="guidedResult" aria-live="polite"></div>';
+ messagesEl.append(root);
+ const guidedForm=$('guidedForm'),guidedPrompt=$('guidedPrompt'),result=$('guidedResult');
+ guidedForm.addEventListener('submit',async e=>{
+  e.preventDefault();const value=guidedPrompt.value.trim();if(!value)return;
+  const button=guidedForm.querySelector('button');button.disabled=true;button.textContent=isAgent?'Planning…':'Preparing lesson…';result.textContent='Thinkora is working on your request…';
+  const instruction=isAgent
+   ? 'You are Thinkora Agent, a careful task-planning assistant. Turn the user goal into a practical plan with: desired outcome, ordered steps, tools or information needed, risks or dependencies, and concrete deliverables. Where possible, prepare useful drafts or templates in the answer. Be honest: do not claim to have browsed, executed code, contacted people, changed accounts, purchased anything or completed external actions unless a connected tool actually did so. Ask for confirmation before any consequential external action. User goal: '+value
+   : 'You are Thinkora Learning Mode, a patient tutor. Teach the requested topic at '+$('guidedLevel').value+' level. Start with a simple explanation, build step by step, use a relatable example, explain key terms, then give a short practice exercise and invite the learner to try. Topic or question: '+value;
+  try{const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:'chat',messages:[{role:'user',text:instruction}]})});const data=await readResponse(response);const reply=String(data.reply||'').trim();if(!reply)throw new Error('Thinkora returned an empty response.');result.innerHTML=renderMarkdown(reply)}
+  catch(error){result.textContent='Could not complete this request: '+(error.message||'Please try again.')}
+  finally{button.disabled=false;button.textContent=isAgent?'Create my plan ↗':'Start learning ↗'}
+ });
+ guidedPrompt.focus();scrollToLatest();
+}
+$('thinkoraAgentNav').onclick=()=>openGuidedWorkspace('agent');
+$('learningModeNav').onclick=()=>openGuidedWorkspace('learning');
 
 $('pluginStoreNav').onclick=openPluginStore;
 $('developerStudioNav').onclick=()=>{setWorkspaceActive('developerStudioNav');showToolPage('Developer Studio','Build and submit plugins for review. Public publishing requires developer accounts, server-side validation and a secure execution environment.',[{name:'Plugin manifest',detail:'Define a plugin name, description, version and permitted actions.'},{name:'API connection',detail:'Keep credentials on the server and request only necessary permissions.'},{name:'Submit for review',detail:'Publishing will be enabled after the backend registry and review process are configured.'}]);};
