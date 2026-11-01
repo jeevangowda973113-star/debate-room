@@ -432,7 +432,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
  <div class="workspace-tools">
   <div class="workspace-tools-bar">
    <div class="sidebar-group">Workspace</div>
-   <button class="tools-plus" id="toolsPlus" type="button" aria-label="Open tools menu" aria-expanded="false" title="More tools">＋</button>
+   <button class="tools-plus" id="toolsPlus" type="button" aria-label="Open tools menu" aria-expanded="false" title="More tools" onclick="const m=document.getElementById('toolsMenu');const o=m.hidden;m.hidden=!o;this.setAttribute('aria-expanded',String(o));this.textContent=o?'×':'＋'">＋</button>
   </div>
   <div class="tools-menu" id="toolsMenu" hidden>
    <button class="nav-item" id="thinkoraAgentNav" type="button"><span class="nav-icon">✦</span><span>Thinkora Agent</span><span class="nav-meta">Plan</span></button>
@@ -564,7 +564,7 @@ form.addEventListener('submit',()=>{if(listening&&recognition)recognition.stop()
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
 document.querySelectorAll('.suggestion').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.prompt;input.dispatchEvent(new Event('input'));input.focus()}));
 const toolsMenu=$('toolsMenu'),toolsPlus=$('toolsPlus');
-toolsPlus.onclick=()=>{const open=toolsMenu.hidden;toolsMenu.hidden=!open;toolsPlus.setAttribute('aria-expanded',String(open));toolsPlus.textContent=open?'×':'＋'};
+// The plus button uses its inline toggle so it remains responsive independently.
 $('uploadImageMenu').onclick=()=>{$('imageInput').click();toolsMenu.hidden=true;toolsPlus.setAttribute('aria-expanded','false');toolsPlus.textContent='＋'};
 toolsMenu.addEventListener('click',e=>{if(e.target.closest('button:not(#uploadImageMenu)')){toolsMenu.hidden=true;toolsPlus.setAttribute('aria-expanded','false');toolsPlus.textContent='＋'}});
 $('newChat').onclick=()=>{document.querySelector('.composer-wrap').style.display='';$('codeWorkspace').classList.remove('open');setWorkspaceActive('');makeChat()};
