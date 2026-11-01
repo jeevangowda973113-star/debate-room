@@ -147,7 +147,7 @@ async function callGeminiModel(apiKey, systemInstruction, input, messages, task,
     for (const message of messages) {
       const parts = [{ text: message.text || "" }];
       for (const image of (message.images || []).slice(0, 4)) {
-        const match = typeof image === "string" && image.match(/^data:image\\/(jpeg|png|webp);base64,(.+)$/);
+        const match = typeof image === "string" && image.match(/^data:image\/(jpeg|png|webp);base64,(.+)$/);
         if (match && match[2].length <= 3_000_000) {
           parts.push({ inline_data: { mime_type: "image/" + match[1], data: match[2] } });
         }
