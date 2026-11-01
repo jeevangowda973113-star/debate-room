@@ -1,6 +1,6 @@
-const MAX_HISTORY_MESSAGES = 8;
-const MAX_HISTORY_CHARS = 14000;
-const MAX_MESSAGE_CHARS = 12000;
+const MAX_HISTORY_MESSAGES = 6;
+const MAX_HISTORY_CHARS = 9000;
+const MAX_MESSAGE_CHARS = 8000;
 const MAX_TOPIC_CHARS = 1200;
 const REQUEST_TIMEOUT_MS = 55000;
 
@@ -72,13 +72,10 @@ function buildChatInstruction(mode) {
     general: "For general questions: answer directly, then add only the context needed to make the answer understandable and useful."
   };
   return base + "\n\n" + modes[mode] + "\n\n" +
-    "DEEP QUALITY STANDARD\n" +
-    "- For difficult requests, reason through the problem carefully before writing; do not expose private chain-of-thought.\n" +
-    "- Break complex work into verifiable stages and make dependencies explicit.\n" +
-    "- Check calculations, code logic, edge cases, and internal consistency before responding.\n" +
-    "- Prefer robust, maintainable solutions over clever but fragile shortcuts.\n" +
-    "- If current facts or external systems are needed and no tool is available, clearly state what cannot be verified.\n" +
-    "- Never claim code was tested or an action completed unless a tool confirms it.";
+    "QUALITY CHECK\n" +
+    "- Verify key facts, calculations, code logic, and important edge cases.\n" +
+    "- Keep straightforward answers concise; expand only when the task needs it.\n" +
+    "- Never claim external actions or tests occurred unless confirmed.";
 }
 
 async function callThinkoraModel(endpoint, model, apiKey, systemInstruction, input, messages, task, mode, outputTokens) {
@@ -233,9 +230,11 @@ export default async function handler(req, res) {
 
     const latestPrompt = safeMessages.length ? safeMessages[safeMessages.length - 1].text : input;
     const complexRequest = isComplexRequest(latestPrompt);
-    const outputTokens = task === "debate" ? 2200 : complexRequest ? (mode === "coding" ? 2000 : 1500) : mode === "coding" ? 1600 : mode === "reasoning" ? 1300 : mode === "learning" ? 1000 : mode === "creative" ? 900 : 750;
+    const outputTokens = task === "debate" ? 1700 : complexRequest ? (mode === "coding" ? 1400 : mode === "reasoning" ? 1100 : 900) : mode === "coding" ? 1100 : mode === "reasoning" ? 850 : mode === "learning" ? 700 : mode === "creative" ? 650 : 500;
     const hasImages = safeMessages.some(message => message.images?.length);
-    const modelName = hasImages ? visionModelName : (complexRequest && reasoningModelName ? reasoningModelName : defaultModelName);
+    // Keep ordinary and complex requests on the fast default model. Use the
+    // optional reasoning model only when the user explicitly selects reasoning mode.
+    const modelName = hasImages ? visionModelName : (mode === "reasoning" && reasoningModelName ? reasoningModelName : defaultModelName);
 
     const reply = await callThinkoraModel(
       modelEndpoint,
