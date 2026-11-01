@@ -729,8 +729,8 @@ function openGuidedWorkspace(kind){
  });
  guidedPrompt.focus();scrollToLatest();
 }
-$('thinkoraAgentNav').onclick=()=>openGuidedWorkspace('agent');
-$('learningModeNav').onclick=()=>openGuidedWorkspace('learning');
+if($('thinkoraAgentNav'))$('thinkoraAgentNav').onclick=()=>openGuidedWorkspace('agent');
+if($('learningModeNav'))$('learningModeNav').onclick=()=>openGuidedWorkspace('learning');
 
 
 $('pluginStoreNav').onclick=openPluginStore;
@@ -738,7 +738,7 @@ $('scheduledNav').onclick=()=>{setWorkspaceActive('');showToolPage('Scheduled','
 $('libraryNav').onclick=()=>{ $('libraryNav').classList.add('active'); $('searchHistory').focus(); };
 $('exploreNav').onclick=()=>{setWorkspaceActive('');showToolPage('Explore Thinkora','Explore the tools available in Thinkora.',[{name:'Plugins',detail:'Browse available integrations from the Plugins section.'},{name:'Codex',detail:'Open the coding workspace to build and edit projects.'},{name:'Images',detail:'Create images in Thinkora Studio.'}]);};
 
-$('developerStudioNav').onclick=()=>{setWorkspaceActive('developerStudioNav');showToolPage('Developer Studio','Build and submit plugins for review. Public publishing requires developer accounts, server-side validation and a secure execution environment.',[{name:'Plugin manifest',detail:'Define a plugin name, description, version and permitted actions.'},{name:'API connection',detail:'Keep credentials on the server and request only necessary permissions.'},{name:'Submit for review',detail:'Publishing will be enabled after the backend registry and review process are configured.'}]);};
+if($('developerStudioNav'))$('developerStudioNav').onclick=()=>{setWorkspaceActive('developerStudioNav');showToolPage('Developer Studio','Build and submit plugins for review. Public publishing requires developer accounts, server-side validation and a secure execution environment.',[{name:'Plugin manifest',detail:'Define a plugin name, description, version and permitted actions.'},{name:'API connection',detail:'Keep credentials on the server and request only necessary permissions.'},{name:'Submit for review',detail:'Publishing will be enabled after the backend registry and review process are configured.'}]);};
 
 mode.addEventListener('change',()=>{input.placeholder=mode.value==='code'?'Describe the code you want to build or debug...':mode.value==='debate'?'Enter a topic to debate...':'Message Thinkora...';});
 search.addEventListener('input',renderHistory);
