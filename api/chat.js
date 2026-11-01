@@ -138,7 +138,48 @@ async function callThinkoraModel(endpoint, model, apiKey, systemInstruction, inp
   return reply.trim();
 }
 
-const THINKORA_DEBATE_INSTRUCTION = "You are Thinkora AI, the moderator and final analyst of a simulated multi-panel debate. The debate has THREE GROUPS, each representing a panel of 100: (1) 100 everyday people, (2) 100 CEOs/business leaders, and (3) 100 AI chatbots. Thinkora AI moderates, challenges the panels, and gives the final answer after all three rounds.\n\n" +
+
+async function callGeminiModel(apiKey, systemInstruction, input, messages, task, outputTokens) {
+  const contents = [];
+  if (task === "chat" && messages.length) {
+    for (const message of messages) {
+      const parts = [{ text: message.text || "" }];
+      for (const image of (message.images || []).slice(0, 4)) {
+        const match = typeof image === "string" && image.match(/^data:image\\/(jpeg|png|webp);base64,(.+)$/);
+        if (match && match[2].length <= 3_000_000) {
+          parts.push({ inline_data: { mime_type: "image/" + match[1], data: match[2] } });
+        }
+      }
+      contents.push({ role: message.role === "model" ? "model" : "user", parts });
+    }
+  } else {
+    contents.push({ role: "user", parts: [{ text: input }] });
+  }
+
+  const response = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemInstruction }] },
+        contents,
+        generationConfig: { maxOutputTokens: outputTokens, temperature: 0.35 }
+      })
+    }
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const detail = data?.error?.message || "Gemini returned HTTP " + response.status + ".";
+    throw new Error(String(detail).slice(0, 220));
+  }
+  const reply = (data?.candidates?.[0]?.content?.parts || [])
+    .map(part => part?.text || "").join("").trim();
+  if (!reply) throw new Error("Gemini returned an empty response.");
+  return reply;
+}
+\nconst THINKORA_DEBATE_INSTRUCTION = "You are Thinkora AI, the moderator and final analyst of a simulated multi-panel debate. The debate has THREE GROUPS, each representing a panel of 100: (1) 100 everyday people, (2) 100 CEOs/business leaders, and (3) 100 AI chatbots. Thinkora AI moderates, challenges the panels, and gives the final answer after all three rounds.\n\n" +
   "HONEST REPRESENTATION RULE: These are AI-SIMULATED panel perspectives, not 300 real people, verified CEOs, or independently running chatbots. Never claim that real participants were contacted, polled, or that 300 separate agents actually responded. Present each 100-member panel as a synthesized range of plausible viewpoints, with majority tendencies and meaningful minority views. Do not invent vote counts, percentages, named participants, or survey results.\n\n" +
   "MANDATORY: Run ALL THREE rounds in order. Each round must include all three panels and then a Thinkora AI moderator note. Do not skip, merge, or replace the rounds with a direct answer.\n\n" +
   "ROUND 1 — OPENING VIEWS\n" +
@@ -175,17 +216,6 @@ export default async function handler(req, res) {
     const visionModelName = process.env.THINKORA_VISION_MODEL || "@cf/meta/llama-4-scout-17b-16e-instruct";
     const reasoningModelName = process.env.THINKORA_REASONING_MODEL || "";
     const modelApiKey = process.env.THINKORA_MODEL_API_KEY;
-    if (!modelEndpoint) {
-      return res.status(503).json({
-        error: "Thinkora's self-hosted model is not connected yet. Configure THINKORA_MODEL_URL in Vercel Environment Variables."
-      });
-    }
-    if (!modelApiKey || !modelApiKey.trim()) {
-      return res.status(503).json({
-        error: "Thinkora's Cloudflare model token is missing. Add THINKORA_MODEL_API_KEY to Vercel Production Environment Variables, then redeploy."
-      });
-    }
-
     const body = req.body && typeof req.body === "object" ? req.body : {};
     const { task = "chat", topic = "", messages = [], mode: requestedMode = "" } = body;
     if (!["chat", "debate", "definition"].includes(task)) {
@@ -236,13 +266,14 @@ export default async function handler(req, res) {
     // optional reasoning model only when the user explicitly selects reasoning mode.
     const modelName = hasImages ? visionModelName : (mode === "reasoning" && reasoningModelName ? reasoningModelName : defaultModelName);
 
-    // Use Groq's low-latency model for ordinary text chats when configured.
-    // Keep Cloudflare for vision, debate, coding and deliberate reasoning tasks.
+    // Provider priority: Groq -> Gemini -> Thinkora's existing model backend.
+    // Keep the same prompts, conversation history, modes and response contract.
     const groqApiKey = process.env.GROQ_API_KEY;
-    const useFastGroq = Boolean(groqApiKey && !hasImages && task === "chat" &&
-      ["general", "learning", "creative"].includes(mode));
+    const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
     let reply;
-    if (useFastGroq) {
+    let usedModel = "";
+
+    if (groqApiKey) {
       try {
         reply = await callThinkoraModel(
           "https://api.groq.com/openai/v1/chat/completions",
@@ -255,18 +286,32 @@ export default async function handler(req, res) {
           mode,
           outputTokens
         );
+        usedModel = "groq/llama-3.1-8b-instant";
       } catch (groqError) {
-        console.warn("Thinkora fast provider unavailable; falling back to Cloudflare:", String(groqError?.message || groqError).slice(0, 180));
-        reply = await callThinkoraModel(
-          modelEndpoint, modelName, modelApiKey, systemInstruction,
-          input, safeMessages, task, mode, outputTokens
-        );
+        console.warn("Thinkora Groq provider failed; trying Gemini:", String(groqError?.message || groqError).slice(0, 180));
       }
-    } else {
+    }
+
+    if (!reply && geminiApiKey) {
+      try {
+        reply = await callGeminiModel(
+          geminiApiKey, systemInstruction, input, safeMessages, task, outputTokens
+        );
+        usedModel = "gemini-2.5-flash";
+      } catch (geminiError) {
+        console.warn("Thinkora Gemini provider failed; trying Thinkora backend:", String(geminiError?.message || geminiError).slice(0, 180));
+      }
+    }
+
+    if (!reply) {
+      if (!modelEndpoint || !modelApiKey || !modelApiKey.trim()) {
+        throw new Error("All configured AI providers are unavailable. Add GROQ_API_KEY, GEMINI_API_KEY, and keep Thinkora's existing THINKORA_MODEL_URL and THINKORA_MODEL_API_KEY configured.");
+      }
       reply = await callThinkoraModel(
         modelEndpoint, modelName, modelApiKey, systemInstruction,
         input, safeMessages, task, mode, outputTokens
       );
+      usedModel = "thinkora/" + modelName;
     }
     return res.status(200).json({
       reply,
