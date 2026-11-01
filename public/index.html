@@ -291,6 +291,77 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 .thinkora-brand-hero p{font-size:1.02rem;line-height:1.45;color:#dedede;margin:0}
 @media(max-width:520px){.thinkora-brand-hero{padding:13px;border-radius:17px}.thinkora-brand-row{font-size:1.4rem}.thinkora-brand-row .welcome-mark{width:48px;height:48px}}
 
+
+/* Thinkora monochrome shell + deep-blue conversation surfaces */
+:root{
+ --bg:#050505;--sidebar:#0b0b0b;--panel:#151515;--panel2:#202020;
+ --ink:#f1f1f1;--muted:#a0a0a0;--line:#303030;
+ --accent:#c8c8c8;--accent2:#858585;--user:#102747;
+ --shadow:0 18px 55px #0009;
+}
+html,body,.app,.main{background:var(--bg);color:var(--ink)}
+.sidebar{background:#090909;border-right:1px solid #252525}
+.brand,.topbar,.composer-wrap{background-color:#050505}
+.topbar{border-bottom:1px solid #202020}
+.new-chat,.suggestion,.icon-btn,.message-actions button,.code-btn,.plugin-card,
+.plugin-hero,.video-hero,.video-preview-panel,.video-controls-panel,.video-timeline-panel,
+.code-files,.code-editor-panel,.code-ai-panel,.code-preview-panel{
+ border-color:#303030;
+}
+.new-chat,.suggestion,.code-files,.code-editor-panel,.code-ai-panel,.code-preview-panel,
+.plugin-card,.video-preview-panel,.video-controls-panel,.video-timeline-panel{
+ background:#141414;
+}
+.nav-item,.history-item,.side-action{color:#a5a5a5}
+.nav-item:hover,.history-item:hover,.history-item.active,.side-action:hover,
+.new-chat:hover,.suggestion:hover{background:#202020;color:#f3f3f3}
+.nav-item.active{background:#252525;border-color:#383838;color:#fff}
+.nav-icon,.avatar,.debate-steps-title,.debate-step-number{color:#c7c7c7}
+.avatar{background:#262626}
+.search,.plugin-search,.plugin-filter,.plugin-run textarea,.plugin-output,
+.video-control-group input[type=text],.video-control-group input[type=number],
+.video-control-group select,.code-ai-panel textarea{background:#101010;color:#eee;border-color:#343434}
+.message.user .msg-body,.message.assistant .msg-body{
+ background:#102747;color:#eaf1fb;border:1px solid #1c3b61;
+ border-radius:17px;padding:13px 16px;max-width:min(92%,740px);
+ box-shadow:0 5px 20px #0003;
+}
+.message.user .msg-body{background:#102747;border-color:#24466e}
+.message.assistant .msg-body{background:#0c2039;border-color:#1b3555}
+.message.user .msg-avatar{background:#18365a;color:#dceaff}
+.message.assistant .msg-avatar{background:#202020;color:#d0d0d0}
+.msg-body pre,.msg-body code{background:#08172a;border-color:#203a5a;color:#e5edf8}
+.composer{background:#151515;border-color:#383838;box-shadow:0 8px 30px #0008}
+.composer:focus-within,.vs-chat-compose:focus-within{border-color:#777;box-shadow:0 0 0 3px #ffffff0a}
+.composer textarea,.mode-select{color:#ededed}
+.mode-select{background:#202020;border-color:#3a3a3a}
+.send,.code-btn.primary,.plugin-card-actions button.primary,.plugin-run button.primary,
+.video-btn.primary{background:#d0d0d0;color:#101010;border-color:#d0d0d0}
+.send:hover,.code-btn.primary:hover,.video-btn.primary:hover{filter:brightness(1.08)}
+.mic-btn{background:#202020;border-color:#383838;color:#c8c8c8}
+.status-dot{background:#b5b5b5;box-shadow:0 0 10px #aaa5}
+.code-editor{background:#090909;color:#e2e2e2}
+.plugin-hero,.video-hero{background:linear-gradient(135deg,#191919,#101010)}
+.plugin-icon{background:#242424;color:#d0d0d0}
+.video-preview-stage{background:#000}
+.video-btn,.code-btn,.plugin-card-actions button,.plugin-run button{
+ background:#222;color:#eee;border-color:#3a3a3a
+}
+.video-track-fill{background:#777}
+.video-progress span{background:#bdbdbd}
+input[type=range]{accent-color:#bdbdbd}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+ outline:2px solid #a8a8a8;outline-offset:2px
+}
+.history,.conversation{scrollbar-color:#555 #171717}
+.history::-webkit-scrollbar-thumb,.conversation::-webkit-scrollbar-thumb{
+ background:#555;border-color:#171717
+}
+@media(max-width:800px){
+ .sidebar{background:#090909}
+ .message.user .msg-body,.message.assistant .msg-body{max-width:100%}
+}
+
 </style>
 </head>
 <body>
