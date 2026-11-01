@@ -1,3 +1,4 @@
+const { guardRequest } = require("./_lib/guard.js");
 const MAX_NAME = 80;
 const MAX_DESCRIPTION = 500;
 const MAX_MANIFEST = 12000;
@@ -35,7 +36,7 @@ function json(res, status, body) {
 }
 function config() {
   const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY;
+  const key = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) throw new Error("Plugin backend is not configured. Add SUPABASE_URL and SUPABASE_ANON_KEY in Vercel.");
   return { url: url.replace(/\/$/, ""), key };
 }
@@ -46,8 +47,9 @@ async function supabase(path, { url, key, token, method = "GET", body, prefer } 
       apikey: key,
       Authorization: "Bearer " + (token || key),
       "Content-Type": "application/json",
-      ...(prefer ? { Prefer: prefer } : {})
+      ...(prefer ? { Prefer: prefer } : {}),
     },
+    signal: AbortSignal.timeout(8000),
     ...(body ? { body: JSON.stringify(body) } : {})
   });
   const raw = await response.text();
@@ -80,6 +82,8 @@ module.exports = async function handler(req, res) {
     res.setHeader("Allow", "GET, POST, OPTIONS");
     return json(res, 405, { error: "Method not allowed." });
   }
+  const guard = await guardRequest(req, { name: "plugins", limit: req.method === "GET" ? 60 : 20, windowMs: 60_000, maxBytes: 100_000 });
+  if (!guard.ok) return json(res, guard.status, { error: guard.error });
   try {
     if (req.method === "GET") {
       let community = [];
@@ -128,7 +132,8 @@ module.exports = async function handler(req, res) {
       const pluginId = String(body.pluginId || "");
       if (!/^[0-9a-f-]{36}$/i.test(pluginId)) return json(res, 400, { error: "A valid plugin ID is required." });
       if (body.action === "install") {
-        await supabase("/rest/v1/plugins?id=eq." + encodeURIComponent(pluginId) + "&status=eq.approved&select=id", { ...cfg, token });
+        const approved = await supabase("/rest/v1/plugins?id=eq." + encodeURIComponent(pluginId) + "&status=eq.approved&select=id", { ...cfg, token });
+        if (!Array.isArray(approved) || !approved.length) return json(res, 404, { error: "This plugin is not available for installation." });
         const rows = await supabase("/rest/v1/plugin_installs", {
           ...cfg, token, method: "POST", prefer: "resolution=merge-duplicates,return=minimal",
           body: { user_id: user.id, plugin_id: pluginId }
