@@ -1,1 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="chrome" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".48" stop-color="#aeb6c8"/><stop offset="1" stop-color="#eef2ff"/></linearGradient><radialGradient id="bg"><stop stop-color="#10131b"/><stop offset="1" stop-color="#020204"/></radialGradient><filter id="glow"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><rect x="12" y="12" width="488" height="488" rx="92" fill="url(#bg)" stroke="#64708a" stroke-opacity=".55" stroke-width="3"/><g fill="none" stroke="url(#chrome)" stroke-width="31" stroke-linecap="round" stroke-linejoin="round"><path d="M255 94c-76 0-139 62-139 138 0 43 20 81 52 106l93 72c48 37 117 28 154-20 37-48 28-117-20-154l-91-70c-16-12-32-20-49-24"/><path d="M256 94c76 0 139 62 139 138 0 43-20 81-52 106l-93 72c-48 37-117 28-154-20-37-48-28-117 20-154l91-70c16-12 32-20 49-24"/></g><path d="M161 205h190l-28 42h-54v111h-48V247h-88z" fill="url(#chrome)" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M69 338c85-65 193-111 327-144" fill="none" stroke="#e8f0ff" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/><circle cx="396" cy="194" r="8" fill="#fff" filter="url(#glow)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+<rect x="3" y="3" width="122" height="122" rx="28" fill="#050505" stroke="#303030" stroke-width="2"/>
+<g fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M61 27c-14-8-29 2-29 17-12 6-13 23-3 31-4 13 5 25 18 25 5 0 10-2 14-6V27Z"/>
+<path d="M67 27c14-8 29 2 29 17 12 6 13 23 3 31 4 13-5 25-18 25-5 0-10-2-14-6V27Z"/>
+<path d="M61 42c-8-7-17-2-17 6m17 8c-9-4-17 2-16 10m16 7c-8-2-13 4-12 11m23-42c8-7 17-2 17 6m-17 8c9-4 17 2 16 10m-16 7c8-2 13 4 12 11M64 26v76"/>
+<path d="M44 48h-8m8 18h-9m9 18h-7m47-36h8m-8 18h9m-9 18h7"/>
+</g>
+</svg>
