@@ -236,17 +236,38 @@ export default async function handler(req, res) {
     // optional reasoning model only when the user explicitly selects reasoning mode.
     const modelName = hasImages ? visionModelName : (mode === "reasoning" && reasoningModelName ? reasoningModelName : defaultModelName);
 
-    const reply = await callThinkoraModel(
-      modelEndpoint,
-      modelName,
-      modelApiKey,
-      systemInstruction,
-      input,
-      safeMessages,
-      task,
-      mode,
-      outputTokens
-    );
+    // Use Groq's low-latency model for ordinary text chats when configured.
+    // Keep Cloudflare for vision, debate, coding and deliberate reasoning tasks.
+    const groqApiKey = process.env.GROQ_API_KEY;
+    const useFastGroq = Boolean(groqApiKey && !hasImages && task === "chat" &&
+      ["general", "learning", "creative"].includes(mode));
+    let reply;
+    if (useFastGroq) {
+      try {
+        reply = await callThinkoraModel(
+          "https://api.groq.com/openai/v1/chat/completions",
+          "llama-3.1-8b-instant",
+          groqApiKey,
+          systemInstruction,
+          input,
+          safeMessages,
+          task,
+          mode,
+          outputTokens
+        );
+      } catch (groqError) {
+        console.warn("Thinkora fast provider unavailable; falling back to Cloudflare:", String(groqError?.message || groqError).slice(0, 180));
+        reply = await callThinkoraModel(
+          modelEndpoint, modelName, modelApiKey, systemInstruction,
+          input, safeMessages, task, mode, outputTokens
+        );
+      }
+    } else {
+      reply = await callThinkoraModel(
+        modelEndpoint, modelName, modelApiKey, systemInstruction,
+        input, safeMessages, task, mode, outputTokens
+      );
+    }
     return res.status(200).json({
       reply,
       assistant: "Thinkora AI",
