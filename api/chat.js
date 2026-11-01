@@ -1,3 +1,5 @@
+import guardModule from "./_lib/guard.js";
+const { guardRequest } = guardModule;
 const MAX_HISTORY_MESSAGES = 6;
 const MAX_HISTORY_CHARS = 9000;
 const MAX_MESSAGE_CHARS = 8000;
@@ -209,6 +211,8 @@ const THINKORA_DEFINITION_INSTRUCTION = "You are Thinkora's neutral explainer. E
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  const guard = await guardRequest(req, { name: "chat", limit: 20, windowMs: 60_000, maxBytes: 13_000_000 });
+  if (!guard.ok) return res.status(guard.status).json({ error: guard.error });
 
   try {
     const modelEndpoint = process.env.THINKORA_MODEL_URL;
@@ -316,7 +320,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       reply,
       assistant: "Thinkora AI",
-      model: modelName,
+      model: usedModel,
       mode,
       depth: complexRequest ? "deep" : "standard"
     });
