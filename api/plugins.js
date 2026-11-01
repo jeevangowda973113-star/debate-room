@@ -6,7 +6,7 @@ const BUILTIN_PLUGINS = [
   { id: "calculator", name: "Smart Calculator", description: "Evaluate arithmetic expressions, percentages and powers.", category: "Productivity", icon: "∑", version: "1.0.0", source: "Thinkora", builtin: true },
   { id: "json-tools", name: "JSON Formatter", description: "Validate, format and minify JSON data.", category: "Developer", icon: "{ }", version: "1.0.0", source: "Thinkora", builtin: true },
   { id: "text-insights", name: "Text Insights", description: "Count words, characters, sentences and estimated reading time.", category: "Writing", icon: "Aa", version: "1.0.0", source: "Thinkora", builtin: true },
-  { id: "slug-maker", name: "URL Slug Maker", description: "Convert titles into clean URL-friendly slugs.", category: "Developer", icon: "↗", version: "1.0.0", source: "Thinkora", builtin: true }
+  { id: "slug-maker", name: "URL Slug Maker", description: "Convert titles into clean URL-friendly slugs.", category: "Developer", icon: "↗", version: "1.0.0", source: "Thinkora", builtin: true },\n  { id: "case-converter", name: "Case Converter", description: "Convert text to uppercase, lowercase, title case or sentence case.", category: "Writing", icon: "Aa", version: "1.0.0", source: "Thinkora", builtin: true },\n  { id: "csv-json", name: "CSV to JSON", description: "Convert simple CSV data into formatted JSON.", category: "Developer", icon: "⇄", version: "1.0.0", source: "Thinkora", builtin: true },\n  { id: "character-counter", name: "Character Counter", description: "Count characters, words, lines and paragraphs.", category: "Productivity", icon: "№", version: "1.0.0", source: "Thinkora", builtin: true }
 ];
 function runBuiltin(id, input) {
   const value = String(input ?? "");
@@ -25,6 +25,14 @@ function runBuiltin(id, input) {
   if (id === "json-tools") { let parsed; try { parsed=JSON.parse(value); } catch(e) { throw new Error("Invalid JSON: "+e.message); } return { result: JSON.stringify(parsed,null,2), compact: JSON.stringify(parsed) }; }
   if (id === "text-insights") { const words=value.trim()?value.trim().split(/\s+/).length:0; const sentences=value.trim()?(value.match(/[.!?]+(?=\s|$)/g)||[]).length:0; return { result: "Words: "+words+"\nCharacters: "+value.length+"\nCharacters (without spaces): "+value.replace(/\s/g,"").length+"\nSentences: "+sentences+"\nEstimated reading time: "+(words?Math.max(1,Math.ceil(words/200))+" min":"0 min") }; }
   if (id === "slug-maker") return { result: value.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,180) };
+  if (id === "case-converter") return { result: value.toLowerCase().replace(/(^|[.!?]\\s+)([a-z])/g,(_,a,b)=>a+b.toUpperCase()).replace(/\\b[a-z]/g,c=>c.toUpperCase()) };
+  if (id === "csv-json") {
+    const rows=value.trim().split(/\\r?\\n/); if(rows.length<2||rows.length>1001)throw new Error("Provide a header row and up to 1,000 data rows.");
+    const parse=line=>{const out=[];let cell="",quoted=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'&&line[i+1]==='"'&&quoted){cell+='"';i++;}else if(c==='"')quoted=!quoted;else if(c===","&&!quoted){out.push(cell);cell="";}else cell+=c;}if(quoted)throw new Error("CSV contains an unclosed quoted field.");out.push(cell);return out;};
+    const headers=parse(rows.shift()).map(h=>h.trim());if(!headers.length||headers.some(h=>!h))throw new Error("Every CSV column needs a header.");
+    const result=rows.filter(line=>line.trim()).map(line=>{const cells=parse(line);if(cells.length!==headers.length)throw new Error("Each row must match the header columns.");return Object.fromEntries(headers.map((h,i)=>[h,cells[i]]));});return {result:JSON.stringify(result,null,2)};
+  }
+  if (id === "character-counter") {const words=value.trim()?value.trim().split(/\\s+/).length:0;return {result:"Characters: "+value.length+"\\nCharacters without spaces: "+value.replace(/\\s/g,"").length+"\\nWords: "+words+"\\nLines: "+(value?value.split(/\\r?\\n/).length:0)+"\\nParagraphs: "+(value.trim()?value.trim().split(/\\n\\s*\\n/).length:0)};}
   throw new Error("Unknown or unavailable built-in plugin.");
 }
 
