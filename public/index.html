@@ -231,7 +231,7 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
  .brand{padding-bottom:10px}
 }
 
- .attach-btn{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--ink);font-size:22px;cursor:pointer;flex:0 0 auto}.image-preview{display:flex;gap:9px;flex-wrap:wrap;padding:10px 12px 2px}.image-preview[hidden]{display:none}.image-preview-item{position:relative;width:68px;height:68px}.image-preview-item img,.message-images img{width:100%;height:100%;object-fit:cover;border-radius:10px}.image-preview-item button{position:absolute;right:-6px;top:-6px;border:0;border-radius:50%;width:22px;height:22px;background:#333;color:white;cursor:pointer}.message-images{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.message-images img{width:auto;height:auto;max-width:min(240px,100%);max-height:220px;object-fit:contain;border:1px solid var(--line)}
+ .attach-btn{position:relative;z-index:35;pointer-events:auto;touch-action:manipulation;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:#242424;color:#fff;font-size:24px;cursor:pointer;flex:0 0 auto;display:grid;place-items:center}.composer-attach-wrap{position:relative;z-index:34;flex:none}.composer-tools-menu{z-index:40}.image-preview{display:flex;gap:9px;flex-wrap:wrap;padding:10px 12px 2px}.image-preview[hidden]{display:none}.image-preview-item{position:relative;width:68px;height:68px}.image-preview-item img,.message-images img{width:100%;height:100%;object-fit:cover;border-radius:10px}.image-preview-item button{position:absolute;right:-6px;top:-6px;border:0;border-radius:50%;width:22px;height:22px;background:#333;color:white;cursor:pointer}.message-images{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.message-images img{width:auto;height:auto;max-width:min(240px,100%);max-height:220px;object-fit:contain;border:1px solid var(--line)}
 
 
 /* Dark native mode menu: prevent the browser's white option popup */
@@ -432,7 +432,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .reference-nav-item:hover,.reference-nav-item.active{background:#1d1d1d;color:#fff}
 .reference-icon{width:20px;height:20px;flex:none;display:grid;place-items:center;color:inherit}
 .reference-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.reference-library{margin-top:14px;min-height:0;flex:1;display:flex;flex-direction:column;gap:8px}
+.reference-library{margin-top:14px;min-height:120px;flex:1 1 auto;display:flex;flex-direction:column;gap:8px;overflow:hidden}.reference-library-title{font-size:13px;color:#aaa;padding:8px}.reference-library .history{flex:1 1 auto;min-height:80px;max-height:none;overflow-y:auto;overscroll-behavior:contain}
 .reference-library[hidden]{display:none!important}
 .reference-library-title{font-size:13px;color:#aaa;padding:8px}
 .reference-library .history{max-height:100%;overflow:auto}
@@ -595,7 +595,7 @@ document.querySelectorAll('.suggestion').forEach(b=>b.addEventListener('click',(
 const composerToolsMenu=$('composerToolsMenu');
 function closeComposerTools(){if(composerToolsMenu){composerToolsMenu.hidden=true;attachButton?.setAttribute('aria-expanded','false')}}
 if(attachButton&&composerToolsMenu){
- attachButton.addEventListener('click',e=>{e.preventDefault();const opening=composerToolsMenu.hidden;composerToolsMenu.hidden=!opening;attachButton.setAttribute('aria-expanded',String(opening))});
+ attachButton.onclick=e=>{e.preventDefault();e.stopPropagation();if(busy)return;const opening=composerToolsMenu.hidden;composerToolsMenu.hidden=!opening;attachButton.setAttribute('aria-expanded',String(opening));};
  composerToolsMenu.addEventListener('click',e=>{
   const option=e.target.closest('[data-tool]');if(!option)return;
   const tool=option.dataset.tool;closeComposerTools();
@@ -735,7 +735,7 @@ $('learningModeNav').onclick=()=>openGuidedWorkspace('learning');
 
 $('pluginStoreNav').onclick=openPluginStore;
 $('scheduledNav').onclick=()=>{setWorkspaceActive('');showToolPage('Scheduled','Scheduled tasks are not available yet in this Thinkora build.',[{name:'Coming soon',detail:'This space will show your scheduled reminders and recurring tasks when scheduling is connected.'}]);};
-$('libraryNav').onclick=()=>{const panel=$('referenceLibrary'),open=panel.hidden;panel.hidden=!open;$('libraryNav').setAttribute('aria-expanded',String(open));$('libraryNav').classList.toggle('active',open);if(open)$('searchHistory').focus();};
+$('libraryNav').onclick=()=>{ $('libraryNav').classList.add('active'); $('searchHistory').focus(); };
 $('exploreNav').onclick=()=>{setWorkspaceActive('');showToolPage('Explore Thinkora','Explore the tools available in Thinkora.',[{name:'Plugins',detail:'Browse available integrations from the Plugins section.'},{name:'Codex',detail:'Open the coding workspace to build and edit projects.'},{name:'Images',detail:'Create images in Thinkora Studio.'}]);};
 
 $('developerStudioNav').onclick=()=>{setWorkspaceActive('developerStudioNav');showToolPage('Developer Studio','Build and submit plugins for review. Public publishing requires developer accounts, server-side validation and a secure execution environment.',[{name:'Plugin manifest',detail:'Define a plugin name, description, version and permitted actions.'},{name:'API connection',detail:'Keep credentials on the server and request only necessary permissions.'},{name:'Submit for review',detail:'Publishing will be enabled after the backend registry and review process are configured.'}]);};
