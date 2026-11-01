@@ -288,7 +288,19 @@ function titleFrom(text){const t=text.trim().replace(/\s+/g,' ');return t.length
 function renderHistory(){const term=search.value.trim().toLowerCase();historyEl.replaceChildren();const list=chats.filter(c=>c.title.toLowerCase().includes(term)||c.messages.some(m=>String(m.text||'').toLowerCase().includes(term)));if(!list.length){const e=document.createElement('div');e.className='empty-history';e.textContent=chats.length?'No matching chats.':'Your recent chats will appear here.';historyEl.append(e);return}list.forEach(c=>{const b=document.createElement('button');b.className='history-item'+(c.id===activeId?' active':'');b.type='button';const ico=document.createElement('span');ico.textContent='◌';const label=document.createElement('span');label.textContent=c.title;b.append(ico,label);b.title=c.title;b.onclick=()=>{activeId=c.id;renderHistory();renderChat();sidebar.classList.remove('open')};historyEl.append(b)})}
 function renderMarkdown(text){
  const escape=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
- let html=escape(String(text));
+ // Some model responses arrive with HTML emphasis tags instead of Markdown.
+ // Convert a small allowlist to Markdown before escaping everything else.
+ let source=String(text)
+   .replace(/<\\/?strong\\s*>/gi,'**')
+   .replace(/<\\/?b\\s*>/gi,'**')
+   .replace(/<\\/?em\\s*>/gi,'*')
+   .replace(/<\\/?i\\s*>/gi,'*')
+   .replace(/<br\\s*\\/?\\s*>/gi,'\\n')
+   .replace(/<\\/?p\\s*>/gi,'\\n\\n')
+   .replace(/<li\\s*>/gi,'- ')
+   .replace(/<\\/li\\s*>/gi,'\\n')
+   .replace(/<\\/?(?:ul|ol)\\s*>/gi,'\\n');
+ let html=escape(source);
  const protectedParts=[];
  const protect=value=>{const token='@@THINKORA_PART_'+protectedParts.length+'@@';protectedParts.push(value);return token};
  // Protect code before applying Markdown so asterisks, underscores and symbols remain literal.
