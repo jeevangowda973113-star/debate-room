@@ -79,7 +79,8 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 .disclaimer{text-align:center;color:var(--muted);font-size:.7rem;margin:9px 0 0}
 .mobile-menu{display:none}.mobile-menu svg{display:block;width:22px;height:22px}
 .empty-history{padding:12px 9px;color:var(--muted);font-size:.82rem}
-@media(max-width:800px){.app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:10;inset:0 auto 0 0;width:min(290px,86vw);transform:translateX(-102%);transition:transform .22s ease;box-shadow:var(--shadow)}.sidebar.open{transform:translateX(0)}.mobile-menu{display:grid}.mobile-brand{display:block}.main{height:100%;min-height:0}.conversation{flex:1 1 0;height:0;min-height:0;overflow-y:auto}.topbar{padding:0 14px}.page-label,.status{display:none}.conversation{padding:24px 15px 15px}.composer-wrap{padding:8px 12px max(14px,env(safe-area-inset-bottom))}.suggestions{grid-template-columns:1fr;max-width:440px;margin-top:24px}.welcome{padding:18px 0 0}.hint{display:none}}
+.sidebar-backdrop{display:none}
+@media(max-width:800px){.app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:10;inset:0 auto 0 0;width:min(290px,86vw);transform:translateX(-102%);transition:transform .22s ease;box-shadow:var(--shadow)}.sidebar.open{transform:translateX(0)}.mobile-menu{display:grid}.mobile-brand{display:block}.main{height:100%;min-height:0}.conversation{flex:1 1 0;height:0;min-height:0;overflow-y:auto}.topbar{padding:0 14px}.page-label,.status{display:none}.conversation{padding:24px 15px 15px}.composer-wrap{padding:8px 12px max(14px,env(safe-area-inset-bottom))}.suggestions{grid-template-columns:1fr;max-width:440px;margin-top:24px}.welcome{padding:18px 0 0}.hint{display:none}.sidebar-backdrop.active{display:block;position:fixed;inset:0;z-index:9;background:rgba(0,0,0,.48);touch-action:manipulation}}
 @media(max-width:420px){.brand{padding-left:2px}.topbar{height:58px}.welcome-mark{width:68px;height:68px}.welcome p{font-size:.9rem}.message{gap:9px;grid-template-columns:29px minmax(0,1fr)}.message.user{grid-template-columns:minmax(0,1fr) 29px}.msg-avatar{width:29px;height:29px}.msg-body{font-size:.92rem}.composer{border-radius:16px}.mode-select{max-width:135px}}
 .history::-webkit-scrollbar,.conversation::-webkit-scrollbar{width:9px}.history::-webkit-scrollbar-thumb,.conversation::-webkit-scrollbar-thumb{background:var(--accent2);border:2px solid var(--panel2);border-radius:9px}.history::-webkit-scrollbar-track,.conversation::-webkit-scrollbar-track{background:var(--panel2);border-radius:9px}.history::-webkit-scrollbar{width:9px}.history::-webkit-scrollbar-track{background:var(--panel2);border-radius:8px}.history::-webkit-scrollbar-thumb{background:var(--accent2);border:2px solid var(--panel2);border-radius:8px}.history::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 .conversation::-webkit-scrollbar{width:10px}.conversation::-webkit-scrollbar-track{background:var(--panel2)}.conversation::-webkit-scrollbar-thumb{background:var(--accent2);border:2px solid var(--panel2);border-radius:10px}.conversation::-webkit-scrollbar-thumb:hover{background:var(--accent)}
@@ -294,6 +295,7 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 </head>
 <body>
 <div class="app">
+<button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Close sidebar" tabindex="-1"></button>
 <aside class="sidebar" id="sidebar">
  <div class="brand"><img class="logo" src="/thinkora-mark.svg" alt="Thinkora logo"><span>Thinkora</span></div>
  <button class="new-chat" id="newChat"><span>＋</span> New chat</button>
@@ -545,7 +547,19 @@ search.addEventListener('input',renderHistory);
 function toggleTheme(){document.documentElement.dataset.theme='dark';try{localStorage.setItem(THEME,'dark')}catch{}}
 $('themeToggle').onclick=toggleTheme;$('topTheme').onclick=toggleTheme;
 document.documentElement.dataset.theme='dark';try{localStorage.setItem(THEME,'dark')}catch{}
-$('menuToggle').onclick=()=>{const isOpen=sidebar.classList.toggle('open');$('menuToggle').setAttribute('aria-expanded',String(isOpen));$('menuToggle').setAttribute('aria-label',isOpen?'Close sidebar':'Open sidebar')};
+function closeMobileSidebar(){
+ sidebar.classList.remove('open');$('sidebarBackdrop').classList.remove('active');
+ $('menuToggle').setAttribute('aria-expanded','false');$('menuToggle').setAttribute('aria-label','Open sidebar');
+}
+function openMobileSidebar(){
+ sidebar.classList.add('open');$('sidebarBackdrop').classList.add('active');
+ $('menuToggle').setAttribute('aria-expanded','true');$('menuToggle').setAttribute('aria-label','Close sidebar');
+}
+$('menuToggle').onclick=()=>sidebar.classList.contains('open')?closeMobileSidebar():openMobileSidebar();
+$('sidebarBackdrop').onclick=closeMobileSidebar;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sidebar.classList.contains('open'))closeMobileSidebar()});
+sidebar.addEventListener('click',e=>{if(e.target.closest('button.nav-item,button.new-chat,button.history-item'))closeMobileSidebar()});
+window.addEventListener('resize',()=>{if(window.innerWidth>800)closeMobileSidebar()});
 $('clearHistory').onclick=()=>{if(!chats.length)return;if(confirm('Clear all saved Thinkora conversations on this device?')){chats=[];activeId=null;save();renderHistory();renderChat()}};
 load();renderHistory();renderChat();
 })();
