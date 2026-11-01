@@ -424,6 +424,30 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 </style>
 </head>
 <body>
+<style>
+#thinkoraAuthGate{position:fixed;inset:0;z-index:99999;background:#080808;display:grid;place-items:center;padding:20px;font-family:inherit}
+#thinkoraAuthGate[hidden]{display:none}
+.ta-card{width:min(420px,100%);padding:30px;border:1px solid #343434;border-radius:20px;background:#171717;color:#f5f5f5}
+.ta-card h1{font-size:27px;margin:0 0 8px}.ta-card p{color:#aaa;line-height:1.5}
+.ta-card input{width:100%;box-sizing:border-box;margin:7px 0;padding:13px;border:1px solid #444;border-radius:10px;background:#090909;color:#fff;font:inherit}
+.ta-card button{width:100%;margin-top:10px;padding:12px;border:0;border-radius:10px;background:#f4f4f5;color:#111;font-weight:700;font:inherit;cursor:pointer}
+.ta-card .ta-secondary{background:#292929;color:#eee;border:1px solid #444}.ta-card small{display:block;color:#aaa;margin-top:12px;line-height:1.5}.ta-error{color:#ff9b9b!important;min-height:20px;font-size:13px}
+#thinkoraAccount{font-size:12px;color:#aaa;padding:8px 10px}
+</style>
+<div id="thinkoraAuthGate">
+ <form class="ta-card" id="thinkoraAuthForm">
+  <div style="font-size:12px;letter-spacing:.16em;color:#aaa;font-weight:700;margin-bottom:12px">THINKORA AI</div>
+  <h1 id="taTitle">Welcome back</h1><p id="taSubtitle">Sign in to access your workspace and saved progress.</p>
+  <input id="taEmail" type="email" autocomplete="email" placeholder="Email address" required>
+  <input id="taPassword" type="password" autocomplete="current-password" placeholder="Password" minlength="8" required>
+  <button id="taSubmit" type="submit">Sign in</button>
+  <button class="ta-secondary" id="taGoogle" type="button">Continue with Google</button>
+  <button class="ta-secondary" id="taToggle" type="button">Create an account</button>
+  <p class="ta-error" id="taError" role="alert"></p>
+  <small>Your chats and projects are saved to your Thinkora account. Use the same account on each device.</small>
+ </form>
+</div>
+
 <div class="app">
 <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Close sidebar" tabindex="-1"></button>
 <aside class="sidebar" id="sidebar">
@@ -488,6 +512,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
  </div>
 </main>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>
 <script src="/video-studio.js"></script>
 <script>
 (()=>{
@@ -695,7 +720,35 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sidebar.classList.c
 sidebar.addEventListener('click',e=>{if(e.target.closest('button.nav-item,button.new-chat,button.history-item'))closeMobileSidebar()});
 window.addEventListener('resize',()=>{if(window.innerWidth>800)closeMobileSidebar()});
 $('clearHistory').onclick=()=>{if(!chats.length)return;if(confirm('Clear all saved Thinkora conversations on this device?')){chats=[];activeId=null;save();renderHistory();renderChat()}};
-load();renderHistory();renderChat();
+
+// Account authentication and per-user cloud progress. Requires Supabase project URL + anon/publishable key.
+let thinkoraSupabase=null,thinkoraUser=null,authMode='signin',cloudSaveTimer=null;
+const authGate=document.getElementById('thinkoraAuthGate');
+function authMessage(message){$('taError').textContent=message||''}
+function localProgress(){const data={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('thinkora-'))data[k]=localStorage.getItem(k)}return data}
+async function saveCloudProgress(){if(!thinkoraSupabase||!thinkoraUser)return;const payload={user_id:thinkoraUser.id,data:localProgress(),updated_at:new Date().toISOString()};const {error}=await thinkoraSupabase.from('user_progress').upsert(payload,{onConflict:'user_id'});if(error)console.warn('Thinkora cloud save failed:',error.message)}
+function queueCloudSave(){if(!thinkoraUser)return;clearTimeout(cloudSaveTimer);cloudSaveTimer=setTimeout(saveCloudProgress,900)}
+async function restoreCloudProgress(){const {data,error}=await thinkoraSupabase.from('user_progress').select('data').eq('user_id',thinkoraUser.id).maybeSingle();if(error)throw error;if(data?.data&&typeof data.data==='object'){for(const [k,v] of Object.entries(data.data)){if(k.startsWith('thinkora-')&&typeof v==='string')localStorage.setItem(k,v)}}}
+function showAuth(mode){authMode=mode;$('taTitle').textContent=mode==='signup'?'Create your account':'Welcome back';$('taSubtitle').textContent=mode==='signup'?'Create an account to save your Thinkora progress.':'Sign in to access your workspace and saved progress.';$('taSubmit').textContent=mode==='signup'?'Create account':'Sign in';$('taToggle').textContent=mode==='signup'?'I already have an account':'Create an account';$('taPassword').autocomplete=mode==='signup'?'new-password':'current-password';authMessage('')}
+async function bootThinkoraAuth(){
+ try{
+  const cfgRes=await fetch('/api/config');if(!cfgRes.ok)throw new Error('Authentication is not configured yet. Add SUPABASE_URL and SUPABASE_ANON_KEY in Vercel.');const cfg=await cfgRes.json();
+  if(!cfg.supabaseUrl||!cfg.supabaseAnonKey)throw new Error('Authentication is not configured yet. Add SUPABASE_URL and SUPABASE_ANON_KEY in Vercel.');
+  if(!window.supabase?.createClient)throw new Error('Could not load the authentication library. Refresh the page.');
+  thinkoraSupabase=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+  const {data:{session}}=await thinkoraSupabase.auth.getSession();
+  if(session){thinkoraUser=session.user;await enterThinkora(session)}
+  thinkoraSupabase.auth.onAuthStateChange(async(_event,session)=>{if(session&&!thinkoraUser){thinkoraUser=session.user;await enterThinkora(session)}else if(!session&&thinkoraUser){thinkoraUser=null;location.reload()}});
+ }catch(error){authGate.hidden=false;authMessage(error.message||'Could not initialize sign-in.')}
+}
+async function enterThinkora(session){thinkoraUser=session.user;try{await restoreCloudProgress()}catch(e){authGate.hidden=false;authMessage('Could not load saved progress: '+e.message);return}authGate.hidden=true;load();renderHistory();renderChat();const slot=document.getElementById('thinkoraAccount');if(slot)slot.textContent=thinkoraUser.email||'Signed in';}
+document.getElementById('thinkoraAuthForm').addEventListener('submit',async e=>{e.preventDefault();if(!thinkoraSupabase){authMessage('Authentication is not configured.');return}const email=$('taEmail').value.trim(),password=$('taPassword').value;$('taSubmit').disabled=true;authMessage('');try{const result=authMode==='signup'?await thinkoraSupabase.auth.signUp({email,password}):await thinkoraSupabase.auth.signInWithPassword({email,password});if(result.error)throw result.error;if(result.data.session)await enterThinkora(result.data.session);else authMessage('Check your email to confirm your account, then sign in.')}catch(err){authMessage(err.message||'Sign-in failed.')}finally{$('taSubmit').disabled=false}});
+$('taToggle').onclick=()=>showAuth(authMode==='signin'?'signup':'signin');
+$('taGoogle').onclick=async()=>{if(!thinkoraSupabase){authMessage('Authentication is not configured.');return}const {error}=await thinkoraSupabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin}});if(error)authMessage(error.message)};
+window.addEventListener('storage',queueCloudSave);
+const nativeSetItem=localStorage.setItem.bind(localStorage);localStorage.setItem=(key,value)=>{nativeSetItem(key,value);if(String(key).startsWith('thinkora-'))queueCloudSave()};
+
+bootThinkoraAuth();
 })();
 </script>
 </body>
