@@ -441,6 +441,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .sidebar .history-item:hover,.sidebar .history-item.active{background:#202020;color:#fff}
 .sidebar .empty-history{color:#858585}
 @media(max-width:800px){.app{grid-template-columns:1fr!important}.sidebar{padding:18px 12px!important}}
+
+/* ChatGPT-style composer tools menu */
+.composer-attach-wrap{position:relative;flex:none}.composer-tools-menu{position:absolute;left:0;bottom:calc(100% + 12px);z-index:30;width:min(390px,calc(100vw - 34px));max-height:min(62vh,510px);overflow:auto;padding:8px;border:1px solid var(--line);border-radius:18px;background:#242424;box-shadow:0 18px 55px #0009;display:grid;gap:3px}.composer-tools-menu[hidden]{display:none!important}.composer-tool-option{display:flex;align-items:center;gap:13px;width:100%;min-height:45px;padding:8px 11px;border:0;border-radius:11px;background:transparent;color:#f4f4f4;text-align:left;font-size:.9rem}.composer-tool-option:hover,.composer-tool-option:focus-visible{background:#3a3a3a;outline:none}.tool-option-icon{width:25px;flex:none;text-align:center;font-size:1.05rem}.composer-tool-option small{display:inline;margin-left:10px;color:#aaa;font-size:.82rem;font-weight:400}.composer-tool-option span:last-child{min-width:0}@media(max-width:480px){.composer-tools-menu{width:min(360px,calc(100vw - 28px));max-height:58vh}.composer-tool-option small{display:block;margin:2px 0 0}}
 </style>
 </head>
 <body>
@@ -492,7 +495,21 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
     <div id="imagePreview" class="image-preview" hidden></div>
     <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>
     <div class="composer-input-row">
-     <button class="attach-btn" id="attachButton" type="button" aria-label="Add photos" title="Add photos">＋</button>
+     <div class="composer-attach-wrap">
+     <button class="attach-btn" id="attachButton" type="button" aria-label="Open tools" title="Open tools" aria-expanded="false">＋</button>
+     <div class="composer-tools-menu" id="composerToolsMenu" role="menu" hidden>
+      <button type="button" class="composer-tool-option" data-tool="upload"><span class="tool-option-icon">📎</span><span>Add photos &amp; files<small>Upload from computer</small></span></button>
+      <button type="button" class="composer-tool-option" data-tool="library"><span class="tool-option-icon">📁</span><span>Add from library<small>Browse your saved conversations</small></span></button>
+      <button type="button" class="composer-tool-option" data-tool="image"><span class="tool-option-icon">🖼️</span><span>Create image<small>Visualize anything</small></span></button>
+      <button type="button" class="composer-tool-option" data-tool="search"><span class="tool-option-icon">🌐</span><span>Web search<small>Ask for current information</small></span></button>
+      <button type="button" class="composer-tool-option" data-tool="research"><span class="tool-option-icon">📡</span><span>Deep research<small>Prepare a detailed research brief</small></span></button>
+      <button type="button" class="composer-tool-option" data-tool="sketch"><span class="tool-option-icon">✍️</span><span>Sketch<small>Open a drawing pad</small></span></button>
+      <button type="button" class="composer-tool-option" data-tool="thinking"><span class="tool-option-icon">◉</span><span>Thinking<small>Use detailed reasoning mode</small></span></button>
+      <button type="button" class="composer-tool-option" data-tool="github"><span class="tool-option-icon">⌘</span><span>GitHub<small>Open repositories and pull requests</small></span></button>
+      <button type="button" class="composer-tool-option" data-tool="vercel"><span class="tool-option-icon">▲</span><span>Vercel<small>Build and deploy apps</small></span></button>
+      <button type="button" class="composer-tool-option" data-tool="canva"><span class="tool-option-icon">▣</span><span>Canva<small>Create and edit designs</small></span></button>
+     </div>
+    </div>
      <textarea id="prompt" rows="1" maxlength="5000" placeholder="Message Thinkora..." aria-label="Message Thinkora"></textarea>
      <button class="mic-btn" id="micButton" type="button" aria-label="Start voice input" title="Voice input"><svg class="mic-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2.5" width="6" height="12" rx="3"></rect><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M8.5 21h7"></path></svg></button>
      <button class="send" id="send" type="submit" aria-label="Send message">↑</button>
@@ -574,6 +591,27 @@ if(SpeechRecognition){recognition=new SpeechRecognition();recognition.lang=navig
 form.addEventListener('submit',()=>{if(listening&&recognition)recognition.stop();});
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
 document.querySelectorAll('.suggestion').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.prompt;input.dispatchEvent(new Event('input'));input.focus()}));
+// The composer plus button opens a working tools menu.
+const composerToolsMenu=$('composerToolsMenu');
+function closeComposerTools(){if(composerToolsMenu){composerToolsMenu.hidden=true;attachButton?.setAttribute('aria-expanded','false')}}
+if(attachButton&&composerToolsMenu){
+ attachButton.addEventListener('click',e=>{e.preventDefault();const opening=composerToolsMenu.hidden;composerToolsMenu.hidden=!opening;attachButton.setAttribute('aria-expanded',String(opening))});
+ composerToolsMenu.addEventListener('click',e=>{
+  const option=e.target.closest('[data-tool]');if(!option)return;
+  const tool=option.dataset.tool;closeComposerTools();
+  if(tool==='upload'){if(!busy&&selectedImages.length<4)imageInput.click();return}
+  if(tool==='library'){$('libraryNav')?.click();return}
+  if(tool==='image'){window.location.href='/thinkora-studio.html#image';return}
+  if(tool==='github'){window.open('https://github.com/','_blank','noopener');return}
+  if(tool==='vercel'){window.open('https://vercel.com/dashboard','_blank','noopener');return}
+  if(tool==='canva'){window.open('https://www.canva.com/','_blank','noopener');return}
+  if(tool==='thinking'){mode.value='chat';input.placeholder='Ask Thinkora for a detailed, step-by-step answer…';input.focus();return}
+  const prompts={search:'Search the web for current, reliable information about: ',research:'Prepare a detailed research brief with key findings, sources to verify, and practical conclusions about: ',sketch:'Help me plan a sketch or visual concept for: '};
+  if(prompts[tool]){input.value=prompts[tool];input.focus();input.dispatchEvent(new Event('input',{bubbles:true}));}
+ });
+ document.addEventListener('click',e=>{if(!e.target.closest('.composer-attach-wrap'))closeComposerTools()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeComposerTools()});
+}
 // The composer plus button opens the native image picker.
 if(attachButton && imageInput){
  attachButton.type='button';
