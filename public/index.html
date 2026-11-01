@@ -422,35 +422,45 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 }
 
 
+
+/* ChatGPT-inspired compact sidebar */
+:root{--bg:#090909;--sidebar:#090909;--panel:#171717;--panel2:#242424;--line:#292929;--ink:#ececec;--muted:#b4b4b4;--accent:#d0d0d0;--accent2:#bdbdbd}
+.app{grid-template-columns:248px minmax(0,1fr)!important;background:#090909}
+.sidebar{padding:20px 12px!important;gap:0!important;background:#090909!important;border-right:1px solid #202020!important}
+.reference-sidebar{display:flex;flex-direction:column;gap:2px;width:100%}
+.reference-nav-item{width:100%;min-height:44px;display:flex;align-items:center;gap:12px;padding:9px 8px;border:0;border-radius:9px;background:transparent;color:#c5c5c5;text-align:left;font-size:15px;font-weight:400;cursor:pointer;transition:background .15s,color .15s}
+.reference-nav-item:hover,.reference-nav-item.active{background:#1d1d1d;color:#fff}
+.reference-icon{width:20px;height:20px;flex:none;display:grid;place-items:center;color:inherit}
+.reference-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.reference-library{margin-top:14px;min-height:0;flex:1;display:flex;flex-direction:column;gap:8px}
+.reference-library[hidden]{display:none!important}
+.reference-library-title{font-size:13px;color:#aaa;padding:8px}
+.reference-library .history{max-height:100%;overflow:auto}
+.reference-library .search{background:#171717;border-color:#303030;border-radius:9px}
+.sidebar .history-item{color:#c3c3c3}
+.sidebar .history-item:hover,.sidebar .history-item.active{background:#202020;color:#fff}
+.sidebar .empty-history{color:#858585}
+@media(max-width:800px){.app{grid-template-columns:1fr!important}.sidebar{padding:18px 12px!important}}
 </style>
 </head>
 <body>
 <div class="app">
 <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Close sidebar" tabindex="-1"></button>
 <aside class="sidebar" id="sidebar">
- <div class="brand"><img class="logo" src="/thinkora-mark.svg" alt="Thinkora logo"><span>Thinkora</span></div>
- <button class="new-chat" id="newChat"><span>＋</span> New chat</button>
- <div class="workspace-tools">
-  <div class="workspace-tools-bar">
-   <div class="sidebar-group">Workspace</div>
-   <button class="tools-plus" id="toolsPlus" type="button" aria-label="Open tools menu" aria-expanded="false" title="More tools" onclick="const m=document.getElementById('toolsMenu');const o=m.hidden;m.hidden=!o;this.setAttribute('aria-expanded',String(o));this.textContent=o?'×':'＋'">＋</button>
-  </div>
-  <div class="tools-menu" id="toolsMenu" hidden>
-   <button class="nav-item" id="thinkoraAgentNav" type="button"><span class="nav-icon">✦</span><span>Thinkora Agent</span><span class="nav-meta">Plan</span></button>
-   <button class="nav-item" id="thinkoraStudioNav" type="button" onclick="window.location.href='/thinkora-studio.html'"><span class="nav-icon">✧</span><span>Thinkora Studio</span><span class="nav-meta">New</span></button>
-   <button class="nav-item" id="imageStudioNav" type="button" onclick="window.location.href='/thinkora-studio.html#image'"><span class="nav-icon">▧</span><span>Image Studio</span><span class="nav-meta">Gemini</span></button>
-   <button class="nav-item" id="codeLabNav" type="button"><span class="nav-icon">⌘</span><span>Code Lab</span><span class="nav-meta">Build</span></button>
-   <button class="nav-item" id="learningModeNav" type="button"><span class="nav-icon">◉</span><span>Learning Mode</span></button>
-   <button class="nav-item" id="pluginStoreNav" type="button"><span class="nav-icon">▦</span><span>Plugin Store</span></button>
-   <button class="nav-item" id="developerStudioNav" type="button"><span class="nav-icon">⌘</span><span>Developer Studio</span></button>
-   <button class="nav-item" id="videoStudioNav" type="button"><span class="nav-icon">▶</span><span>Video Studio</span><span class="nav-meta">Edit</span></button>
-   <button class="nav-item" id="uploadImageMenu" type="button"><span class="nav-icon">▧</span><span>Upload image</span><span class="nav-meta">Attach</span></button>
-  </div>
- </div>
- <div class="nav-label">Your conversations</div>
- <input class="search" id="searchHistory" type="search" placeholder="⌕  Search chats" aria-label="Search conversations">
- <div class="history" id="history"><div class="empty-history">Your recent chats will appear here.</div></div>
- <div class="profile"><div class="avatar">T</div><div><strong style="color:var(--ink)">Thinkora AI</strong><br><span>Personal AI assistant</span></div></div>
+ <nav class="reference-sidebar" aria-label="Main navigation">
+  <button class="reference-nav-item" id="newChat" type="button"><span class="reference-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L9 17l-4 1 1-4Z"/></svg></span><span>New chat</span></button>
+  <button class="reference-nav-item" id="imageStudioNav" type="button" onclick="window.location.href='/thinkora-studio.html#image'"><span class="reference-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="13" height="13" rx="2"/><path d="m7 15 3-3 2 2 2-2 2 2"/><circle cx="8" cy="10" r="1"/><path d="M8 4h11a2 2 0 0 1 2 2v11"/></svg></span><span>Images</span></button>
+  <button class="reference-nav-item" id="scheduledNav" type="button"><span class="reference-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span>Scheduled</span></button>
+  <button class="reference-nav-item" id="libraryNav" type="button" aria-expanded="false"><span class="reference-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5 8 4l4 1.5V20L8 18.5 4 20Z"/><path d="m12 5.5 4-1.5 4 1.5V20l-4-1.5-4 1.5"/><path d="M8 4v14.5M16 4v14.5"/></svg></span><span>Library</span></button>
+  <button class="reference-nav-item" id="pluginStoreNav" type="button"><span class="reference-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M16 8v5a2 2 0 0 1-4 0V9a2 2 0 1 0-2 2h6"/></svg></span><span>Plugins</span></button>
+  <button class="reference-nav-item" id="codeLabNav" type="button"><span class="reference-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 4l-4 16"/></svg></span><span>Codex</span></button>
+  <button class="reference-nav-item" id="exploreNav" type="button"><span class="reference-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></span><span>Explore</span></button>
+ </nav>
+ <section class="reference-library" id="referenceLibrary" hidden>
+  <div class="reference-library-title">Your conversations</div>
+  <input class="search" id="searchHistory" type="search" placeholder="Search chats" aria-label="Search conversations">
+  <div class="history" id="history"><div class="empty-history">Your recent chats will appear here.</div></div>
+ </section>
 </aside>
 <main class="main">
  <header class="topbar">
@@ -686,7 +696,12 @@ function openGuidedWorkspace(kind){
 $('thinkoraAgentNav').onclick=()=>openGuidedWorkspace('agent');
 $('learningModeNav').onclick=()=>openGuidedWorkspace('learning');
 
+
 $('pluginStoreNav').onclick=openPluginStore;
+$('scheduledNav').onclick=()=>{setWorkspaceActive('');showToolPage('Scheduled','Scheduled tasks are not available yet in this Thinkora build.',[{name:'Coming soon',detail:'This space will show your scheduled reminders and recurring tasks when scheduling is connected.'}]);};
+$('libraryNav').onclick=()=>{const panel=$('referenceLibrary'),open=panel.hidden;panel.hidden=!open;$('libraryNav').setAttribute('aria-expanded',String(open));$('libraryNav').classList.toggle('active',open);if(open)$('searchHistory').focus();};
+$('exploreNav').onclick=()=>{setWorkspaceActive('');showToolPage('Explore Thinkora','Explore the tools available in Thinkora.',[{name:'Plugins',detail:'Browse available integrations from the Plugins section.'},{name:'Codex',detail:'Open the coding workspace to build and edit projects.'},{name:'Images',detail:'Create images in Thinkora Studio.'}]);};
+
 $('developerStudioNav').onclick=()=>{setWorkspaceActive('developerStudioNav');showToolPage('Developer Studio','Build and submit plugins for review. Public publishing requires developer accounts, server-side validation and a secure execution environment.',[{name:'Plugin manifest',detail:'Define a plugin name, description, version and permitted actions.'},{name:'API connection',detail:'Keep credentials on the server and request only necessary permissions.'},{name:'Submit for review',detail:'Publishing will be enabled after the backend registry and review process are configured.'}]);};
 
 mode.addEventListener('change',()=>{input.placeholder=mode.value==='code'?'Describe the code you want to build or debug...':mode.value==='debate'?'Enter a topic to debate...':'Message Thinkora...';});
