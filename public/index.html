@@ -612,11 +612,8 @@ if(attachButton&&composerToolsMenu){
  document.addEventListener('click',e=>{if(!e.target.closest('.composer-attach-wrap'))closeComposerTools()});
  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeComposerTools()});
 }
-// The composer plus button opens the native image picker.
-if(attachButton && imageInput){
- attachButton.type='button';
- attachButton.addEventListener('click',()=>{if(!busy && selectedImages.length<4){imageInput.click();}});
-}
+// Upload is launched only from the Upload photos & files menu item.
+
 $('newChat').onclick=()=>{document.querySelector('.composer-wrap').style.display='';$('codeWorkspace').classList.remove('open');setWorkspaceActive('');makeChat()};
 const CODE_STORAGE='thinkora-code-lab-v1';
 let codeFiles={ 'index.html':'<!doctype html>\\n<html>\\n<head>\\n  <meta charset="utf-8">\\n  <meta name="viewport" content="width=device-width, initial-scale=1">\\n  <title>My project</title>\\n  <link rel="stylesheet" href="style.css">\\n</head>\\n<body>\\n  <main><h1>Hello, Thinkora!</h1><p>Start building something.</p></main>\\n  <script src="script.js"></script>\\n</body>\\n</html>', 'style.css':'body { font-family: system-ui, sans-serif; padding: 2rem; }\\nh1 { color: #2563eb; }', 'script.js':'console.log("Thinkora Code Lab is ready!");'};
