@@ -281,6 +281,15 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
 .guided-note{font-size:.73rem;color:var(--muted);line-height:1.5}
 @media(max-width:600px){.guided-hero{padding:18px}.guided-form{padding:12px}}
 
+
+/* Homepage Thinkora identity banner */
+.thinkora-brand-hero{width:100%;box-sizing:border-box;text-align:left;background:#000;color:#f5f5f5;border:1px solid #303030;border-radius:22px;padding:14px 15px 16px;margin:0 auto 24px}
+.thinkora-brand-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;font:600 1.65rem/1 'Space Grotesk',sans-serif;letter-spacing:.015em;color:#f5f5f5}
+.thinkora-brand-row .welcome-mark{width:56px;height:56px;max-height:56px;object-fit:contain;margin:0;filter:none;border-radius:15px}
+.thinkora-brand-hero h1{font:600 clamp(1.35rem,3.2vw,1.85rem)/1.22 'Space Grotesk',sans-serif;letter-spacing:-.035em;margin:0 0 10px;color:#f5f5f5}
+.thinkora-brand-hero p{font-size:1.02rem;line-height:1.45;color:#dedede;margin:0}
+@media(max-width:520px){.thinkora-brand-hero{padding:13px;border-radius:17px}.thinkora-brand-row{font-size:1.4rem}.thinkora-brand-row .welcome-mark{width:48px;height:48px}}
+
 </style>
 </head>
 <body>
@@ -310,10 +319,11 @@ h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(2rem,4vw,3.1rem);line-
  <section class="conversation" id="conversation">
   <div class="content" id="content">
    <div class="welcome" id="welcome">
-    <img class="welcome-mark" src="/thinkora-mark.svg" alt="Thinkora AI logo">
-    <div class="home-eyebrow">YOUR AI WORKSPACE</div>
-    <h1>Think it. Build it.<br>Get it done.</h1>
-    <p>One workspace for learning, creating, coding and turning ideas into real projects.</p>
+    <section class="thinkora-brand-hero" aria-label="Thinkora introduction">
+     <div class="thinkora-brand-row"><img class="welcome-mark" src="/thinkora-mark.svg" alt="Thinkora logo"><span>THINKORA</span></div>
+     <h1>Think less about the tools. Get more things done.</h1>
+     <p>One AI workspace for learning, creating, coding and building.</p>
+    </section>
     <div class="suggestions">
      <button class="suggestion" data-prompt="Help me turn this goal into a practical step-by-step plan with clear deliverables."><strong>✦ Plan with Agent</strong>Turn a goal into an actionable workflow</button>
      <button class="suggestion" data-prompt="Help me build a complete website or app from this idea."><strong>⌘ Build with Code Lab</strong>Create a project from one prompt</button>
