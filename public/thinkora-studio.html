@@ -3,6 +3,31 @@
 <style>
 :root{color-scheme:dark;--bg:#090909;--panel:#171717;--panel2:#222;--line:#333;--ink:#f4f4f5;--muted:#a1a1aa;--accent:#e5e5e5}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}.shell{max-width:1180px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}.brand{font-weight:750;font-size:1.2rem;letter-spacing:-.04em}.brand small{display:block;color:var(--muted);font-size:.72rem;font-weight:400;letter-spacing:0}.back,.tab,.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:9px 13px;text-decoration:none}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}.tab.active,.btn.primary{background:#f4f4f5;color:#111;border-color:#f4f4f5;font-weight:700}.panel{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:20px;min-height:480px}.panel h1{font-size:clamp(1.5rem,4vw,2.2rem);letter-spacing:-.05em;margin:0 0 8px}.muted{color:var(--muted)}.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.field{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#0d0d0d;color:var(--ink);outline:none}.field:focus{border-color:#888}.prompt{min-height:120px;resize:vertical}.stack{display:grid;gap:12px;margin-top:18px}.result{margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:11px;white-space:pre-wrap;overflow-wrap:anywhere;min-height:45px}.result:empty{display:none}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:15px}.card{padding:14px;border:1px solid var(--line);border-radius:12px;background:#101010}.card a{color:#ddd}.card p{color:var(--muted);font-size:.87rem}.preview{max-width:100%;max-height:600px;border-radius:12px;margin-top:14px}.hidden{display:none!important}.chart{width:100%;height:250px;background:#101010;border:1px solid var(--line);border-radius:10px}.chatlog{display:grid;gap:12px;max-height:460px;overflow:auto}.bubble{padding:12px 14px;border-radius:13px;background:#242424;white-space:pre-wrap;overflow-wrap:anywhere}.bubble.user{background:#303030;margin-left:10%}.bubble.ai{margin-right:10%}.status{font-size:.8rem;color:var(--muted)}.link{color:#ddd}.hint{font-size:.78rem;color:var(--muted)}@media(max-width:650px){.shell{padding:14px}.panel{padding:15px}.cards{grid-template-columns:1fr}.top{align-items:flex-start}}
+
+/* Shared Thinkora black / grey / deep-blue visual system */
+:root{--bg:#050505;--panel:#151515;--panel2:#202020;--line:#303030;--ink:#f1f1f1;--muted:#a0a0a0;--accent:#c8c8c8}
+body{background:#050505;color:#f1f1f1}
+.shell{max-width:1240px;padding:26px}
+.top{padding-bottom:15px;border-bottom:1px solid #242424}
+.brand{letter-spacing:-.045em}
+.back,.tab,.btn{background:#1b1b1b;border-color:#353535;color:#e7e7e7;border-radius:11px;transition:background .18s,border-color .18s,transform .18s}
+.back:hover,.tab:hover,.btn:hover{background:#292929;border-color:#555}
+.tab.active,.btn.primary{background:#d0d0d0;color:#101010;border-color:#d0d0d0}
+.panel{background:#111;border-color:#303030;border-radius:18px;box-shadow:0 16px 45px #0006}
+.field{background:#0c0c0c;border-color:#363636;color:#f1f1f1;border-radius:11px}
+.field:focus{border-color:#888;box-shadow:0 0 0 3px #fff1}
+.card{background:#191919;border-color:#333;border-radius:14px}
+.card a,.link{color:#d6d6d6}
+.result{background:#171717;border-color:#383838;border-radius:12px}
+.chatlog{gap:14px}
+.bubble{background:#0c2039;border:1px solid #1b3555;border-radius:15px;color:#eaf1fb;padding:13px 15px}
+.bubble.user{background:#102747;border-color:#24466e;margin-left:10%}
+.bubble.ai{margin-right:10%}
+.chart{background:#101010;border-color:#333}
+.preview{border:1px solid #333}
+.status,.hint,.muted{color:#a0a0a0}
+@media(max-width:650px){.shell{padding:14px}.panel{border-radius:14px}.bubble.user{margin-left:3%}.bubble.ai{margin-right:3%}}
+
 </style></head><body><main class="shell">
 <header class="top"><div class="brand">THINKORA STUDIO<small>One workspace for thinking, creating and building</small></div><a class="back" href="/">← Back to Thinkora</a></header>
 <nav class="tabs" aria-label="Studio tools">
