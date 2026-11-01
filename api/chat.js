@@ -171,7 +171,7 @@ export default async function handler(req, res) {
   try {
     const modelEndpoint = process.env.THINKORA_MODEL_URL;
     const defaultModelName = process.env.THINKORA_MODEL || "qwen2.5:7b";
-    const visionModelName = process.env.THINKORA_VISION_MODEL || "@cf/meta/llama-3.2-11b-vision-instruct";
+    const visionModelName = "@cf/meta/llama-4-scout-17b-16e-instruct";
     const reasoningModelName = process.env.THINKORA_REASONING_MODEL || "";
     const modelApiKey = process.env.THINKORA_MODEL_API_KEY;
     if (!modelEndpoint) {
