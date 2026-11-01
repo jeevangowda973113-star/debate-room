@@ -24,9 +24,9 @@ function getChatMode(message) {
 
 function trimConversation(messages) {
   const valid = (Array.isArray(messages) ? messages : [])
-    .filter(m => ["user", "model"].includes(m?.role) && typeof m?.text === "string" && m.text.trim())
+    .filter(m => ["user", "model"].includes(m?.role) && typeof m?.text === "string" && (m.text.trim() || (Array.isArray(m.images) && m.images.length)))
     .slice(-MAX_HISTORY_MESSAGES)
-    .map(m => ({ role: m.role, text: m.text.slice(-MAX_MESSAGE_CHARS) }));
+    .map(m => ({ role: m.role, text: m.text.slice(-MAX_MESSAGE_CHARS), images: m.role === "user" && Array.isArray(m.images) ? m.images.slice(0,4).filter(image => typeof image === "string" && /^data:image\/(jpeg|png|webp);base64,/.test(image) && image.length <= 3_000_000) : [] }));
 
   const kept = [];
   let chars = 0;
@@ -85,10 +85,13 @@ async function callThinkoraModel(endpoint, model, apiKey, systemInstruction, inp
   const chatMessages = [{ role: "system", content: systemInstruction }];
   if (task === "chat" && messages.length) {
     for (const message of messages) {
-      chatMessages.push({
-        role: message.role === "model" ? "assistant" : "user",
-        content: message.text
-      });
+      const content = [{ type: "text", text: message.text }];
+      for (const image of (message.images || []).slice(0, 4)) {
+        if (typeof image === "string" && /^data:image\/(jpeg|png|webp);base64,/.test(image) && image.length <= 3_000_000) {
+          content.push({ type: "image_url", image_url: { url: image } });
+        }
+      }
+      chatMessages.push({ role: message.role === "model" ? "assistant" : "user", content: content.length > 1 ? content : message.text });
     }
   } else {
     chatMessages.push({ role: "user", content: input });
@@ -168,6 +171,7 @@ export default async function handler(req, res) {
   try {
     const modelEndpoint = process.env.THINKORA_MODEL_URL;
     const defaultModelName = process.env.THINKORA_MODEL || "qwen2.5:7b";
+    const visionModelName = process.env.THINKORA_VISION_MODEL || "@cf/meta/llama-3.2-11b-vision-instruct";
     const reasoningModelName = process.env.THINKORA_REASONING_MODEL || "";
     const modelApiKey = process.env.THINKORA_MODEL_API_KEY;
     if (!modelEndpoint) {
@@ -215,7 +219,8 @@ export default async function handler(req, res) {
     const latestPrompt = safeMessages.length ? safeMessages[safeMessages.length - 1].text : input;
     const complexRequest = isComplexRequest(latestPrompt);
     const outputTokens = task === "debate" ? 2200 : complexRequest ? (mode === "coding" ? 2000 : 1500) : mode === "coding" ? 1600 : mode === "reasoning" ? 1300 : mode === "learning" ? 1000 : mode === "creative" ? 900 : 750;
-    const modelName = complexRequest && reasoningModelName ? reasoningModelName : defaultModelName;
+    const hasImages = safeMessages.some(message => message.images?.length);
+    const modelName = hasImages ? visionModelName : (complexRequest && reasoningModelName ? reasoningModelName : defaultModelName);
 
     const reply = await callThinkoraModel(
       modelEndpoint,
