@@ -118,7 +118,11 @@ async function callThinkoraModel(endpoint, model, apiKey, systemInstruction, inp
     const cloudflareError = Array.isArray(data?.errors)
       ? data.errors.map(item => typeof item === "string" ? item : (item?.message || item?.code || "")).filter(Boolean).join("; ")
       : "";
-    const detail = data?.error?.message || data?.error || cloudflareError || "Thinkora model server returned HTTP " + response.status + ".";
+    const rawError = data?.error?.message || (typeof data?.error === "string" ? data.error : data?.message) || cloudflareError;
+    if (response.status === 404 || response.status === 410) {
+      throw new Error("The configured AI endpoint or model is unavailable (HTTP " + response.status + "). Check THINKORA_MODEL_URL and THINKORA_MODEL in Vercel Environment Variables.");
+    }
+    const detail = rawError || "Thinkora model server returned HTTP " + response.status + ".";
     throw new Error(String(detail).slice(0, 220));
   }
   // Cloudflare Workers AI may return either a standard OpenAI response or
@@ -171,7 +175,7 @@ export default async function handler(req, res) {
   try {
     const modelEndpoint = process.env.THINKORA_MODEL_URL;
     const defaultModelName = process.env.THINKORA_MODEL || "qwen2.5:7b";
-    const visionModelName = "@cf/meta/llama-4-scout-17b-16e-instruct";
+    const visionModelName = process.env.THINKORA_VISION_MODEL || "@cf/meta/llama-4-scout-17b-16e-instruct";
     const reasoningModelName = process.env.THINKORA_REASONING_MODEL || "";
     const modelApiKey = process.env.THINKORA_MODEL_API_KEY;
     if (!modelEndpoint) {
