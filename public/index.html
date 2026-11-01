@@ -743,7 +743,7 @@ $('developerStudioNav').onclick=()=>{setWorkspaceActive('developerStudioNav');sh
 mode.addEventListener('change',()=>{input.placeholder=mode.value==='code'?'Describe the code you want to build or debug...':mode.value==='debate'?'Enter a topic to debate...':'Message Thinkora...';});
 search.addEventListener('input',renderHistory);
 function toggleTheme(){document.documentElement.dataset.theme='dark';try{localStorage.setItem(THEME,'dark')}catch{}}
-$('themeToggle').onclick=toggleTheme;$('topTheme').onclick=toggleTheme;
+if($('themeToggle'))$('themeToggle').onclick=toggleTheme;if($('topTheme'))$('topTheme').onclick=toggleTheme;
 document.documentElement.dataset.theme='dark';try{localStorage.setItem(THEME,'dark')}catch{}
 function closeMobileSidebar(){
  sidebar.classList.remove('open');$('sidebarBackdrop').classList.remove('active');
@@ -758,7 +758,7 @@ $('sidebarBackdrop').onclick=closeMobileSidebar;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sidebar.classList.contains('open'))closeMobileSidebar()});
 sidebar.addEventListener('click',e=>{if(e.target.closest('button.nav-item,button.new-chat,button.history-item'))closeMobileSidebar()});
 window.addEventListener('resize',()=>{if(window.innerWidth>800)closeMobileSidebar()});
-$('clearHistory').onclick=()=>{if(!chats.length)return;if(confirm('Clear all saved Thinkora conversations on this device?')){chats=[];activeId=null;save();renderHistory();renderChat()}};
+if($('clearHistory'))$('clearHistory').onclick=()=>{if(!chats.length)return;if(confirm('Clear all saved Thinkora conversations on this device?')){chats=[];activeId=null;save();renderHistory();renderChat()}};
 
 // Start Thinkora directly. Account login can be added later.
 load();
