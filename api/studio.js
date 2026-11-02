@@ -1,5 +1,7 @@
 const { guardRequest } = require("./_lib/guard.js");
 const MAX_PROMPT = 4000;
+// Image generation can take longer than the default serverless timeout.
+module.exports.config = { maxDuration: 60 };
 function send(res,status,body){res.status(status).setHeader("Content-Type","application/json; charset=utf-8");res.setHeader("Cache-Control","no-store");return res.end(JSON.stringify(body));}
 module.exports = async function handler(req,res){
  if(req.method==="OPTIONS"){res.setHeader("Allow","POST, OPTIONS");res.setHeader("Access-Control-Allow-Headers","Content-Type");return res.status(204).end();}
@@ -19,14 +21,14 @@ module.exports = async function handler(req,res){
     method:"POST",
     headers:{"x-goog-api-key":key,"Content-Type":"application/json"},
     body:JSON.stringify({model,input:[{type:"text",text:prompt}],response_format:{type:"image",mime_type:"image/jpeg",aspect_ratio:aspect,image_size:"1K"}}),
-    signal:AbortSignal.timeout(55_000)
+    signal:AbortSignal.timeout(50_000)
    });
    const data=await response.json().catch(()=>({}));
    if(!response.ok)return send(res,response.status===429?429:502,{error:data.error?.message||data.message||"Gemini image generation failed."});
    const imageData=data.output_image?.data || (Array.isArray(data.steps)?data.steps.filter(step=>step?.type==="model_output").flatMap(step=>Array.isArray(step.content)?step.content:[]).find(part=>part?.type==="image"&&typeof part.data==="string")?.data:undefined);
    if(!imageData)return send(res,502,{error:"Gemini returned no image. Try a different prompt."});
    const mime=["image/png","image/jpeg","image/webp"].includes(data.output_image?.mime_type) ? data.output_image.mime_type : "image/jpeg";
-   if(typeof imageData!=="string"||imageData.length>12_000_000||!/^[A-Za-z0-9+/]+=*$/.test(imageData))return send(res,502,{error:"Gemini returned an invalid or oversized image."});
+   if(typeof imageData!=="string"||imageData.length>4_000_000||!/^[A-Za-z0-9+/]+=*$/.test(imageData))return send(res,502,{error:"Gemini returned an too large to return from this serverless function. Try again or use a smaller image size."});
    return send(res,200,{ok:true,provider:"Gemini",output:["data:"+mime+";base64,"+imageData]});
   }
   if(action==="search"){
