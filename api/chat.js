@@ -180,7 +180,8 @@ async function callGeminiModel(apiKey, systemInstruction, input, messages, task,
   if (!reply) throw new Error("Gemini returned an empty response.");
   return reply;
 }
-\nconst THINKORA_DEBATE_INSTRUCTION = "You are Thinkora AI, the moderator and final analyst of a simulated multi-panel debate. The debate has THREE GROUPS, each representing a panel of 100: (1) 100 everyday people, (2) 100 CEOs/business leaders, and (3) 100 AI chatbots. Thinkora AI moderates, challenges the panels, and gives the final answer after all three rounds.\n\n" +
+
+const THINKORA_DEBATE_INSTRUCTION = "You are Thinkora AI, the moderator and final analyst of a simulated multi-panel debate. The debate has THREE GROUPS, each representing a panel of 100: (1) 100 everyday people, (2) 100 CEOs/business leaders, and (3) 100 AI chatbots. Thinkora AI moderates, challenges the panels, and gives the final answer after all three rounds.\n\n" +
   "HONEST REPRESENTATION RULE: These are AI-SIMULATED panel perspectives, not 300 real people, verified CEOs, or independently running chatbots. Never claim that real participants were contacted, polled, or that 300 separate agents actually responded. Present each 100-member panel as a synthesized range of plausible viewpoints, with majority tendencies and meaningful minority views. Do not invent vote counts, percentages, named participants, or survey results.\n\n" +
   "MANDATORY: Run ALL THREE rounds in order. Each round must include all three panels and then a Thinkora AI moderator note. Do not skip, merge, or replace the rounds with a direct answer.\n\n" +
   "ROUND 1 — OPENING VIEWS\n" +
