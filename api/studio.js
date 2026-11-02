@@ -1,12 +1,11 @@
 const { guardRequest } = require("./_lib/guard.js");
 const MAX_PROMPT = 4000;
 // Image generation can take longer than the default serverless timeout.
-module.exports.config = { maxDuration: 60 };
 function send(res,status,body){res.status(status).setHeader("Content-Type","application/json; charset=utf-8");res.setHeader("Cache-Control","no-store");return res.end(JSON.stringify(body));}
 module.exports = async function handler(req,res){
  if(req.method==="OPTIONS"){res.setHeader("Allow","POST, OPTIONS");res.setHeader("Access-Control-Allow-Headers","Content-Type");return res.status(204).end();}
  if(req.method!=="POST")return send(res,405,{error:"Use POST."});
- const guard=await guardRequest(req,{name:"studio",limit:8,windowMs:60_000,maxBytes:20_000});
+ const guard=await guardRequest(req,{name:"studio",limit:8,windowMs:60_000,maxBytes:3_000_000});
  if(!guard.ok)return send(res,guard.status,{error:guard.error});
  try{
   const body=req.body||{},action=String(body.action||""),prompt=String(body.prompt||"").trim();
@@ -15,12 +14,19 @@ module.exports = async function handler(req,res){
    const key=process.env.GEMINI_API_KEY||process.env.GOOGLE_GEMINI_API_KEY;
    if(!key)return send(res,503,{error:"Gemini image generation is not configured. Add GEMINI_API_KEY in Vercel Environment Variables."});
    const model=String(process.env.THINKORA_GEMINI_IMAGE_MODEL||"gemini-nano-banana-2.1");
+   const input=[{type:"text",text:prompt}];
+   if(body.image&&typeof body.image.data==="string"){
+    const imageData=body.image.data;
+    const imageMime=["image/jpeg","image/png","image/webp"].includes(body.image.mimeType)?body.image.mimeType:"image/jpeg";
+    if(imageData.length>2_700_000||!/^[A-Za-z0-9+/]+=*$/.test(imageData))return send(res,400,{error:"Image attachment is too large or invalid. Choose an image under 2 MB."});
+    input.push({type:"image",mime_type:imageMime,data:imageData});
+   }
    const allowed=["1:1","16:9","9:16","4:3","3:4","4:5","5:4","3:2","2:3","21:9"];
    const aspect=allowed.includes(String(body.aspectRatio||"1:1"))?String(body.aspectRatio||"1:1"):"1:1";
    const response=await fetch("https://generativelanguage.googleapis.com/v1beta/interactions",{
     method:"POST",
     headers:{"x-goog-api-key":key,"Content-Type":"application/json"},
-    body:JSON.stringify({model,input:[{type:"text",text:prompt}],response_format:{type:"image",mime_type:"image/jpeg",aspect_ratio:aspect,image_size:"1K"}}),
+    body:JSON.stringify({model,input,response_format:{type:"image",mime_type:"image/jpeg",aspect_ratio:aspect,image_size:"1K"}}),
     signal:AbortSignal.timeout(50_000)
    });
    const data=await response.json().catch(()=>({}));
@@ -43,3 +49,5 @@ module.exports = async function handler(req,res){
   return send(res,400,{error:"Unknown action. Use image or search."});
  }catch(error){return send(res,500,{error:String(error.message||"Studio request failed.").slice(0,240)});}
 };
+// Vercel function configuration must be attached after assigning the handler.
+module.exports.config = { maxDuration: 60 };
