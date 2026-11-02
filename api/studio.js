@@ -18,14 +18,14 @@ module.exports = async function handler(req,res){
    const response=await fetch("https://generativelanguage.googleapis.com/v1beta/interactions",{
     method:"POST",
     headers:{"x-goog-api-key":key,"Content-Type":"application/json"},
-    body:JSON.stringify({model,input:[{type:"text",text:prompt}],response_format:{type:"image",mime_type:"image/png",aspect_ratio:aspect,image_size:"1K"}}),
+    body:JSON.stringify({model,input:[{type:"text",text:prompt}],response_format:{type:"image",mime_type:"image/jpeg",aspect_ratio:aspect,image_size:"1K"}}),
     signal:AbortSignal.timeout(55_000)
    });
    const data=await response.json().catch(()=>({}));
    if(!response.ok)return send(res,response.status===429?429:502,{error:data.error?.message||data.message||"Gemini image generation failed."});
-   const imageData=data.output_image?.data;
+   const imageData=data.output_image?.data || (Array.isArray(data.steps)?data.steps.filter(step=>step?.type==="model_output").flatMap(step=>Array.isArray(step.content)?step.content:[]).find(part=>part?.type==="image"&&typeof part.data==="string")?.data:undefined);
    if(!imageData)return send(res,502,{error:"Gemini returned no image. Try a different prompt."});
-   const mime=["image/png","image/jpeg","image/webp"].includes(data.output_image.mime_type)?data.output_image.mime_type:"image/png";
+   const mime=["image/png","image/jpeg","image/webp"].includes(data.output_image?.mime_type) ? data.output_image.mime_type : "image/jpeg";
    if(typeof imageData!=="string"||imageData.length>12_000_000||!/^[A-Za-z0-9+/]+=*$/.test(imageData))return send(res,502,{error:"Gemini returned an invalid or oversized image."});
    return send(res,200,{ok:true,provider:"Gemini",output:["data:"+mime+";base64,"+imageData]});
   }
