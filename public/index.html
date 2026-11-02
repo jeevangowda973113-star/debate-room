@@ -511,12 +511,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
       <button type="button" class="composer-tool-option" data-tool="canva"><span class="tool-option-icon">▣</span><span>Canva<small>Create and edit designs</small></span></button>
      </div>
     </div>
-     <textarea id="prompt" rows="1" maxlength="5000" placeholder="Message Thinkora..." aria-label="Message Thinkora"></textarea>
+     <textarea id="prompt" rows="1" maxlength="5000" placeholder="Ask Thinkora" aria-label="Message Thinkora"></textarea>
+     <select class="mode-select think-mode" id="mode" aria-label="Conversation mode" title="Choose conversation mode"><option value="chat">◉ Think</option><option value="debate">⚖ Debate</option></select>
      <button class="mic-btn" id="micButton" type="button" aria-label="Start voice input" title="Voice input"><svg class="mic-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2.5" width="6" height="12" rx="3"></rect><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M8.5 21h7"></path></svg></button>
      <button class="send" id="send" type="submit" aria-label="Send message">↑</button>
-    </div>
-    <div class="composer-bottom">
-     <div class="composer-tools"><select class="mode-select" id="mode" aria-label="Conversation mode"><option value="chat">✦ Ask Thinkora</option><option value="debate">⚖ Debate a topic</option></select><span class="hint">Enter to send · Shift + Enter for a new line</span></div>
     </div>
    </form>
    <p class="disclaimer">Thinkora can make mistakes. Check important information.</p>
@@ -641,7 +639,29 @@ root.innerHTML='<div class="code-head"><div><h2>⌘ Thinkora Codex</h2><div clas
 root.querySelectorAll('[data-codex-prompt]').forEach(card=>card.addEventListener('click',()=>{$('codeAiPrompt').value=card.dataset.codexPrompt;$('codeAiPrompt').focus()}));
 const list=$('codeFileList'),editor=$('codeEditor');
 function drawFiles(){list.replaceChildren();Object.keys(codeFiles).forEach(name=>{const b=document.createElement('button');b.className='code-file'+(name===activeCodeFile?' active':'');b.textContent='▤ '+name;b.onclick=()=>{codeFiles[activeCodeFile]=editor.value;activeCodeFile=name;renderCodeLab()};list.append(b)});$('codeCurrentFile').textContent=activeCodeFile;editor.value=codeFiles[activeCodeFile]||''}
-function runCodePreview(){const currentEditor=$('codeEditor');codeFiles[activeCodeFile]=currentEditor.value;const html=codeFiles['index.html']||'<!doctype html><html><body></body></html>';const css=codeFiles['style.css']||'';const js=codeFiles['script.js']||'';const doc=html.replace(/<link[^>]+href=["']style\.css["'][^>]*>/i,'<style>'+css.replace(/<\/style/gi,'<\\/style')+'</style>').replace(/<script[^>]+src=["']script\.js["'][^>]*><\/script>/i,'<script>'+js.replace(/<\/script/gi,'<\\/script')+'<\/script>');$('codePreview').srcdoc=doc;$('codeStatus').textContent='Preview refreshed in an isolated browser frame.';saveCodeFiles()}
+function runCodePreview(){const currentEditor=$('codeEditor');codeFiles[activeCodeFile]=currentEditor.value;const html=codeFiles['index.html']||'<!doctype html><html><body></body></html>';const css=codeFiles['style.css']||'';const js=codeFiles['script.js']||'';const doc=html.replace(/<link[^>]+href=["']style\.css["'][^>]*>/i,'<style>'+css.replace(/<\/style/gi,'<\\/style')+'
+/* Thinkora compact ChatGPT-inspired message bar */
+.composer-wrap{padding:10px 22px max(18px,env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,var(--bg) 32%)}
+.composer-area{max-width:980px}
+.composer{display:flex;flex-direction:column;gap:0;padding:8px 10px;border:1px solid #343434;border-radius:30px;background:#1d1d1d;box-shadow:0 8px 28px #0003;transition:border-color .18s,box-shadow .18s}
+.composer:focus-within{border-color:#505050;box-shadow:0 8px 30px #0004}
+.composer-input-row{display:flex;align-items:center;gap:12px;min-height:46px;padding:0 2px}
+.composer textarea{flex:1;min-width:0;width:auto;min-height:34px;max-height:160px;padding:8px 4px 7px;align-self:center;color:#f4f4f4;font-size:16px;line-height:1.4}
+.composer textarea::placeholder{color:#a3a3a3}
+.attach-btn{width:38px;height:38px;background:transparent;border:0;color:#e5e5e5;font-size:27px;font-weight:300}
+.attach-btn:hover{background:#303030;border-radius:50%}
+.think-mode{flex:0 0 auto;width:auto;max-width:110px;border:0!important;border-radius:18px!important;background:transparent!important;color:#c5c5c5!important;padding:8px 4px!important;font-size:14px!important}
+.think-mode:focus{box-shadow:none!important}
+.mic-btn{width:36px;height:36px;border:0;background:transparent;color:#e8e8e8;border-radius:50%}
+.mic-btn:hover:not(:disabled){background:#303030;color:#fff;border:0}
+.send{width:44px;height:44px;flex:0 0 44px;border:0;border-radius:50%;background:#35a853;color:#fff;font-size:23px;line-height:1;display:grid;place-items:center}
+.send:disabled{opacity:.45;background:#555;color:#ddd}
+.composer-bottom{display:none}
+.disclaimer{font-size:12px;color:#aaa;margin:7px 0 0}
+.image-preview{padding:8px 12px 4px}
+@media(max-width:800px){.composer-wrap{padding:8px 12px max(12px,env(safe-area-inset-bottom))}.composer{border-radius:26px}.composer-input-row{gap:8px}.think-mode{max-width:88px;font-size:13px!important}.send{width:40px;height:40px;flex-basis:40px}}
+@media(max-width:420px){.composer textarea{max-height:120px}.composer-input-row{gap:6px}.attach-btn{width:34px;height:34px}.think-mode{max-width:78px;padding:7px 1px!important;font-size:12px!important}.mic-btn{width:32px;height:32px}.send{width:38px;height:38px;flex-basis:38px}}
+</style>').replace(/<script[^>]+src=["']script\.js["'][^>]*><\/script>/i,'<script>'+js.replace(/<\/script/gi,'<\\/script')+'<\/script>');$('codePreview').srcdoc=doc;$('codeStatus').textContent='Preview refreshed in an isolated browser frame.';saveCodeFiles()}
 drawFiles();editor.addEventListener('input',()=>{codeFiles[activeCodeFile]=editor.value;saveCodeFiles()});editor.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const a=editor.selectionStart,b=editor.selectionEnd;editor.setRangeText('  ',a,b,'end');editor.dispatchEvent(new Event('input'))}});
 $('codeAddFile').onclick=()=>{const name=prompt('New file name (for example app.js):');if(!name)return;const safe=name.trim().replace(/[^a-zA-Z0-9._/-]/g,'').replace(/^\/+|\/+$/g,'');if(!safe||safe.split('/').includes('..')||codeFiles[safe]){alert('Choose a valid, unused file name.');return}codeFiles[activeCodeFile]=editor.value;codeFiles[safe]='';activeCodeFile=safe;saveCodeFiles();renderCodeLab()};
 $('codeDeleteFile').onclick=()=>{if(Object.keys(codeFiles).length===1){alert('Keep at least one project file.');return}if(!confirm('Delete '+activeCodeFile+'?'))return;delete codeFiles[activeCodeFile];activeCodeFile=Object.keys(codeFiles)[0];saveCodeFiles();renderCodeLab()};
