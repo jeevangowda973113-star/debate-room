@@ -79,7 +79,7 @@ function buildChatInstruction(mode) {
     "- Never claim external actions or tests occurred unless confirmed.";
 }
 
-async function callThinkoraModel(endpoint, model, apiKey, systemInstruction, input, messages, task, mode, outputTokens) {
+async function callThinkoraModel(endpoint, model, apiKey, systemInstruction, input, messages, task, mode, outputTokens, timeoutMs = REQUEST_TIMEOUT_MS) {
   const chatMessages = [{ role: "system", content: systemInstruction }];
   if (task === "chat" && messages.length) {
     for (const message of messages) {
@@ -101,7 +101,7 @@ async function callThinkoraModel(endpoint, model, apiKey, systemInstruction, inp
   const response = await fetch(endpoint, {
     method: "POST",
     headers,
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    signal: AbortSignal.timeout(timeoutMs),
     body: JSON.stringify({
       model,
       messages: chatMessages,
@@ -158,11 +158,11 @@ async function callGeminiModel(apiKey, systemInstruction, input, messages, task,
   }
 
   const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
     {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      signal: AbortSignal.timeout(15_000),
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemInstruction }] },
         contents,
@@ -281,16 +281,17 @@ module.exports = async function handler(req, res) {
       try {
         reply = await callThinkoraModel(
           "https://api.groq.com/openai/v1/chat/completions",
-          "llama-3.1-8b-instant",
+          "openai/gpt-oss-20b",
           groqApiKey,
           systemInstruction,
           input,
           safeMessages,
           task,
           mode,
-          outputTokens
+          outputTokens,
+          12_000
         );
-        usedModel = "groq/llama-3.1-8b-instant";
+        usedModel = "groq/openai/gpt-oss-20b";
       } catch (groqError) {
         console.warn("Thinkora Groq provider failed; trying Gemini:", String(groqError?.message || groqError).slice(0, 180));
       }
@@ -301,7 +302,7 @@ module.exports = async function handler(req, res) {
         reply = await callGeminiModel(
           geminiApiKey, systemInstruction, input, safeMessages, task, outputTokens
         );
-        usedModel = "gemini-2.5-flash";
+        usedModel = "gemini-3.8-flash";
       } catch (geminiError) {
         console.warn("Thinkora Gemini provider failed; trying Thinkora backend:", String(geminiError?.message || geminiError).slice(0, 180));
       }
