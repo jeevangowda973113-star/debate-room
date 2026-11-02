@@ -1,5 +1,4 @@
-import guardModule from "./_lib/guard.js";
-const { guardRequest } = guardModule;
+const { guardRequest } = require("./_lib/guard.js");
 const MAX_HISTORY_MESSAGES = 6;
 const MAX_HISTORY_CHARS = 9000;
 const MAX_MESSAGE_CHARS = 8000;
@@ -209,7 +208,7 @@ async function callGeminiModel(apiKey, systemInstruction, input, messages, task,
 
 const THINKORA_DEFINITION_INSTRUCTION = "You are Thinkora's neutral explainer. Explain topics clearly for a general audience. Define important terms, give relevant context, distinguish facts from opinions, and do not take either side. Never invent facts or sources. Do not reveal private internal chain-of-thought; provide a clear explanation.";
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   const guard = await guardRequest(req, { name: "chat", limit: 20, windowMs: 60_000, maxBytes: 13_000_000 });
   if (!guard.ok) return res.status(guard.status).json({ error: guard.error });
